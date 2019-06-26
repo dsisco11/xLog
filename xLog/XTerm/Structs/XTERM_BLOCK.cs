@@ -1,14 +1,16 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-public struct XTERM_BLOCK
+namespace xLog
 {
-    public List<XTERM_CODE> Codes;
-    public string TEXT;
-
-    public XTERM_BLOCK(string str, List<XTERM_CODE> commands)
+    public struct XTERM_BLOCK
     {
-        TEXT = str;
-        Codes = commands;
+        public List<XTERM_CODE> Codes;
+        public string TEXT;
+
+        public XTERM_BLOCK(string str, List<XTERM_CODE> commands)
+        {
+            TEXT = str;
+            Codes = commands;
+        }
     }
 }

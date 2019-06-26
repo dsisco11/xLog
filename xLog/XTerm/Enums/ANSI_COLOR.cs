@@ -1,12 +1,15 @@
 ﻿
-internal enum ANSI_COLOR : uint
+namespace xLog
 {
-    BLACK = 0,
-    RED,
-    GREEN,
-    YELLOW,
-    BLUE,
-    MAGENTA,
-    CYAN,
-    WHITE
+    internal enum ANSI_COLOR : uint
+    {
+        BLACK = 0,
+        RED,
+        GREEN,
+        YELLOW,
+        BLUE,
+        MAGENTA,
+        CYAN,
+        WHITE
+    }
 }

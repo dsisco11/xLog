@@ -1,43 +1,48 @@
 ﻿using System;
 using System.Text;
 using System.Threading;
-/// <summary>
-/// Basis for a generic console text based tool used for displaying some form of information.
-/// </summary>
-public abstract class ConsoleWidget : IDisposable
+
+namespace xLog
 {
-    public int X { get; private set; }
-    public int Y { get; private set; }
-    public readonly ConsoleWidgetType Type;
-    protected int Disposed = 0;
     /// <summary>
-    /// The <see cref="StaticConsoleLine"/> for this widget.
+    /// Basis for a generic console text based tool used for displaying some form of information.
     /// </summary>
-    protected StaticConsoleLine Line = new StaticConsoleLine();
-    protected StringBuilder Buffer = new StringBuilder();
-
-    public ConsoleWidget(ConsoleWidgetType ty) { Type = ty; }
-    ~ConsoleWidget() { Dispose(); }
-
-    public virtual void Dispose()
+    public abstract class ConsoleWidget : IDisposable
     {
-        if ( Interlocked.Exchange(ref Disposed, 1) == 1 )
-        {
-            return;
-        }
+        public int X { get; private set; }
+        public int Y { get; private set; }
+        public readonly ConsoleWidgetType Type;
+        protected int Disposed = 0;
+        /// <summary>
+        /// The <see cref="StaticConsoleLine"/> for this widget.
+        /// </summary>
+        protected StaticConsoleLine Line = new StaticConsoleLine();
+        protected StringBuilder Buffer = new StringBuilder();
 
-        lock (Buffer)
-        {
-            Buffer.Clear();
-            Buffer = null;
-        }
+        public ConsoleWidget(ConsoleWidgetType ty) { Type = ty; }
+        ~ConsoleWidget() { Dispose(); }
 
-        lock (Line)
+        public virtual void Dispose()
         {
-            Line.Dispose();
-            Line = null;
-        }
+            if (Interlocked.Exchange(ref Disposed, 1) == 1)
+            {
+                return;
+            }
 
-        GC.SuppressFinalize( this );
+            lock (Buffer)
+            {
+                Buffer.Clear();
+                Buffer = null;
+            }
+
+            lock (Line)
+            {
+                Line.Dispose();
+                Line = null;
+            }
+
+            GC.SuppressFinalize(this);
+        }
     }
+
 }

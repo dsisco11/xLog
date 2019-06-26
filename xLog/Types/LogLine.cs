@@ -1,7 +1,10 @@
 ﻿
-public struct LogLine
+namespace xLog
 {
-    public uint Timestamp;
-    public string Text;
-    public ELogLevel Level;
+    public struct LogLine
+    {
+        public uint Timestamp;
+        public string Text;
+        public ELogLevel Level;
+    }
 }
