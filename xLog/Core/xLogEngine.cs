@@ -383,7 +383,7 @@ namespace xLog
             Timing.setTimeout(dt, () =>
             {
                 Banner(ELogLevel.Info, nameof(xLogEngine), "SWITCHING LOG FILES -> {0}", Get_Todays_LogFile());
-                Begin(consoleLogLevel, fileLogLevel);
+                Begin();
             });
         }
 
