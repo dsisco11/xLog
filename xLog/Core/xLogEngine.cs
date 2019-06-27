@@ -81,7 +81,14 @@ namespace xLog
         private static DateTime Now { get { return Settings.Use_UTC_Time ? DateTime.UtcNow : DateTime.Now; } }
         private static ILogLineFormatter CurrentFormatter => (Settings.Formatter ?? DefaultFormatter);
         #endregion
-    
+
+        #region Events
+        /// <summary>
+        /// Fired immediately before the xLogEngine starts to shutdown and stop accepting new log lines.
+        /// </summary>
+        public static event Action onShutdown;
+        #endregion
+
         #region Constructors
         static xLogEngine()
         {
@@ -112,6 +119,8 @@ namespace xLog
 
         private static void Shutdown()
         {
+            Info("Goodbye!");
+            onShutdown.Invoke();
             Dispose();
         }
 
