@@ -282,7 +282,7 @@ namespace xLog
             {
                 try
                 {
-                    if ( !xLogEngine.Settings.AllowXTERM )
+                    if ( !xLogEngine.Settings.AllowColorCodes )
                     {
                         line.Text = XTERM.Strip( line.Text );
                     }
@@ -291,7 +291,7 @@ namespace xLog
                     if (line.Level >= xLogEngine.Settings.LoggingLevel && line.Level != ELogLevel.Console)// NEVER write dummy lines to anything but an active console interface, not to file or to a log-network stream
                     {
                         string FormattedString = null;
-                        if (xLogEngine.Settings.AllowXTERM && xLogEngine.Settings.stripXTERM)
+                        if (!xLogEngine.Settings.AllowColorCodes || !xLogEngine.Settings.AllowConsumerColorCodes)
                         {
                             FormattedString = XTERM.Strip(line.Text);
                         }
@@ -310,7 +310,7 @@ namespace xLog
                     System.Diagnostics.Debug.WriteLine( line.Text );
                     if (line.Level >= xLogEngine.Settings.OutputLevel)
                     {
-                        if (xLogEngine.Settings.AllowXTERM )
+                        if (xLogEngine.Settings.AllowColorCodes )
                         {
                             XTERM.WriteLine( line.Text );
                         }

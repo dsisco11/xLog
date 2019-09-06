@@ -14,14 +14,14 @@ namespace xLog
         public bool showTimestamps = true;
 
         /// <summary>
-        /// Specifies if XTERM colors are allowed in log output, if false then XTERM commands will be stripped from ALL log lines before they are output.
+        /// Specifies if color codes are allowed in log output at all, if false then color codes will be stripped from ALL log lines before they are output to consumers OR the console.
         /// </summary>
-        public bool AllowXTERM = true;
+        public bool AllowColorCodes = true;
 
         /// <summary>
-        /// Should colors be stripped from log lines before they are output to consumers?
+        /// Specified if color codes should be stripped from log lines before they are output to consumers?
         /// </summary>
-        public bool stripXTERM = true;
+        public bool AllowConsumerColorCodes = true;
 
         /// <summary>
         /// If <c>True</c> then every log line output will show it's LogLevel at the start of the line.

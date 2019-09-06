@@ -8,11 +8,12 @@
     <RepositoryUrl>https://github.com/dsisco11/xLog</RepositoryUrl>
     <PackageProjectUrl>https://github.com/dsisco11/xLog</PackageProjectUrl>
     <PackageTags>Logger, XTERM, Multithreaded, Threadsafe</PackageTags>
-    <Description>A multithreaded logging system which allows colored console output on windows via XTERM interpretation.</Description>
+    <Description>A multithreaded logging system which allows colored console output on windows via ANSI color code interpretation.</Description>
     <Copyright />
     <PackageId>Sisco.LogEngine</PackageId>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
