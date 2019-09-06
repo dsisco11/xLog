@@ -282,22 +282,20 @@ namespace xLog
             {
                 try
                 {
-                    if ( !xLogEngine.Settings.AllowColorCodes )
+                    if ( !Settings.AllowColorCodes )
                     {
                         line.Text = XTERM.Strip( line.Text );
                     }
 
                     // Consumer output
-                    if (line.Level >= xLogEngine.Settings.LoggingLevel && line.Level != ELogLevel.Console)// NEVER write dummy lines to anything but an active console interface, not to file or to a log-network stream
+                    if (line.Level >= Settings.LoggingLevel && line.Level != ELogLevel.Console)// NEVER write dummy lines to anything but an active console interface, not to file or to a log-network stream
                     {
-                        string FormattedString = null;
-                        if (!xLogEngine.Settings.AllowColorCodes || !xLogEngine.Settings.AllowConsumerColorCodes)
+                        string FormattedString = line.Text;
+
+                        // We test to make sure AllowColorCodes is true here to avoid performing the color strip twice.
+                        if (!Settings.AllowConsumerColorCodes && Settings.AllowColorCodes)
                         {
-                            FormattedString = XTERM.Strip(line.Text);
-                        }
-                        else
-                        {
-                            FormattedString = line.Text;
+                            FormattedString = XTERM.Strip(FormattedString);
                         }
 
                         foreach (ILogLineConsumer consumer in Consumers)
@@ -308,9 +306,9 @@ namespace xLog
                 
                     // Console output
                     System.Diagnostics.Debug.WriteLine( line.Text );
-                    if (line.Level >= xLogEngine.Settings.OutputLevel)
+                    if (line.Level >= Settings.OutputLevel)
                     {
-                        if (xLogEngine.Settings.AllowColorCodes )
+                        if (Settings.AllowColorCodes )
                         {
                             XTERM.WriteLine( line.Text );
                         }
@@ -571,9 +569,9 @@ namespace xLog
                 indentStr = new string(' ', indentCount);
 
                 // Append the timestamp
-                if (xLogEngine.Settings.showTimestamps) timeStr = string.Concat("[", Now.ToString(xLogEngine.Settings.Timestamp_Format), "] ");
+                if (xLogEngine.Settings.ShowTimestamps) timeStr = string.Concat("[", Now.ToString(xLogEngine.Settings.Timestamp_Format), "] ");
 
-                if (xLogEngine.Settings.showSources)
+                if (xLogEngine.Settings.ShowSources)
                 {
                     if (!string.IsNullOrEmpty(Source)) sourceStr = string.Concat(Source, " ");
                     else if (object.ReferenceEquals(Source, null)) sourceStr = string.Concat(System.AppDomain.CurrentDomain.FriendlyName, " ");

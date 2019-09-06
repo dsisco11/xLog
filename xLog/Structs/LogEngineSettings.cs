@@ -6,12 +6,12 @@ namespace xLog
         /// <summary>
         /// Should log source names be included in the output?
         /// </summary>
-        public bool showSources = true;
+        public bool ShowSources = true;
 
         /// <summary>
         /// Should log lines be timestamped?
         /// </summary>
-        public bool showTimestamps = true;
+        public bool ShowTimestamps = true;
 
         /// <summary>
         /// Specifies if color codes are allowed in log output at all, if false then color codes will be stripped from ALL log lines before they are output to consumers OR the console.
@@ -21,7 +21,7 @@ namespace xLog
         /// <summary>
         /// Specified if color codes should be stripped from log lines before they are output to consumers?
         /// </summary>
-        public bool AllowConsumerColorCodes = true;
+        public bool AllowConsumerColorCodes = false;
 
         /// <summary>
         /// If <c>True</c> then every log line output will show it's LogLevel at the start of the line.
