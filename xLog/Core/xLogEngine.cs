@@ -243,7 +243,7 @@ namespace xLog
 
                 while ( !cancelToken.IsCancellationRequested )
                 {
-                    WaitHandle.WaitAny( Signals );
+                    WaitHandle.WaitAny( Signals );// We DO want to block this writer thread until we need to do work
                     cancelToken.ThrowIfCancellationRequested();
 
                     Clear_Static_Lines();
