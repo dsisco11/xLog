@@ -1,7 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Authors>David Sisco</Authors>
+    <Company>xLog</Company>
+    <RepositoryUrl>https://github.com/dsisco11/xLog</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/dsisco11/xLog</PackageProjectUrl>
+    <PackageTags>Logger, XTERM, Multithreaded, Threadsafe</PackageTags>
+    <Description>A multithreaded logging system which allows colored console output on windows via XTERM interpretation.</Description>
+    <Copyright />
+    <PackageId>Sisco.LogEngine</PackageId>
+    <PackageLicenseExpression></PackageLicenseExpression>
   </PropertyGroup>
 
 </Project>

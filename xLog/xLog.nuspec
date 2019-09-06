@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Sisco.LogEngine</id>
+    <version>1.0.0</version>
+    <title>xLog</title>
+    <authors>David Sisco</authors>
+    <owners>David Sisco</owners>
+    <licenseUrl>https://github.com/dsisco11/xLog/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/dsisco11/xLog</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A multithreaded logging system which allows colored console output on windows via XTERM interpretation.</description>
+    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <copyright>Copyright 2019</copyright>
+    <tags>Logger XTERM Multithreaded Threadsafe</tags>
+  </metadata>
+</package>
