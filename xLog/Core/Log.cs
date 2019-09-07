@@ -16,7 +16,7 @@ namespace xLog
         {
             if (!JOB_TOTAL.HasValue || !JOB_CURRENT.HasValue) return null;
             float prog = ((float)JOB_CURRENT.Value / (float)JOB_TOTAL.Value);
-            return XTERM.greenBright(prog.ToString("P2"));
+            return ANSIColor.greenBright(prog.ToString("P2"));
         });
 
         public static void Set_Name_Function(Func<string> func)

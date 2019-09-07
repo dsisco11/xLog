@@ -95,7 +95,7 @@ namespace xLog
 
         public static void Test()
         {
-            ConsoleCountdown widget = new ConsoleCountdown(TimeSpan.FromSeconds(20), XTERM.cyanBright("Countdown"));
+            ConsoleCountdown widget = new ConsoleCountdown(TimeSpan.FromSeconds(20), ANSIColor.cyanBright("Countdown"));
 
             Task.WaitAll(widget.Get_Task());
 

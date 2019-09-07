@@ -20,22 +20,22 @@ namespace xLog
             switch (level)
             {
                 case ELogLevel.Trace:
-                    return XTERM.blackBright(msg);
+                    return ANSIColor.blackBright(msg);
                 case ELogLevel.Info:
                 case ELogLevel.Debug:
-                    return XTERM.white(msg);
+                    return ANSIColor.white(msg);
                 case ELogLevel.Success:
-                    return XTERM.green(msg);
+                    return ANSIColor.green(msg);
                 case ELogLevel.Failure:
-                    return XTERM.red(msg);
+                    return ANSIColor.red(msg);
                 case ELogLevel.Warn:
-                    return XTERM.yellow(msg);
+                    return ANSIColor.yellow(msg);
                 case ELogLevel.Error:
-                    return XTERM.red(msg);
+                    return ANSIColor.red(msg);
                 case ELogLevel.Assert:
-                    return XTERM.magenta(msg);
+                    return ANSIColor.magenta(msg);
                 case ELogLevel.Interface:
-                    return XTERM.white(msg);
+                    return ANSIColor.white(msg);
                 default:
                     return msg;
             }
@@ -46,22 +46,22 @@ namespace xLog
             switch (level)
             {
                 case ELogLevel.Trace:
-                    return XTERM.white(name);
+                    return ANSIColor.white(name);
                 case ELogLevel.Info:
                 case ELogLevel.Debug:
-                    return XTERM.whiteBright(name);
+                    return ANSIColor.whiteBright(name);
                 case ELogLevel.Success:
-                    return XTERM.greenBright(name);
+                    return ANSIColor.greenBright(name);
                 case ELogLevel.Failure:
-                    return XTERM.redBright(name);
+                    return ANSIColor.redBright(name);
                 case ELogLevel.Warn:
-                    return XTERM.yellowBright(name);
+                    return ANSIColor.yellowBright(name);
                 case ELogLevel.Error:
-                    return XTERM.redBright(name);
+                    return ANSIColor.redBright(name);
                 case ELogLevel.Assert:
-                    return XTERM.magentaBright(name);
+                    return ANSIColor.magentaBright(name);
                 case ELogLevel.Interface:
-                    return XTERM.whiteBright(name);
+                    return ANSIColor.whiteBright(name);
                 default:
                     return name;
             }

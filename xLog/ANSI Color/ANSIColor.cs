@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 /*
  * === SOURCES ===
@@ -13,7 +14,7 @@ namespace xLog
     /// <summary>
     /// Provides a helper class for adding XTERM/ANSI color codes to log messages.
     /// </summary>
-    public static class XTERM
+    public static class ANSIColor
     {
 
         #region OS Testing
@@ -53,24 +54,36 @@ namespace xLog
 
         #region COMMAND BUILDING
 
-        internal static string oCmd(int code) { return string.Concat(CSI, '[', (int)code, 'm'); }
-        internal static string oCmd(int A, int B) { return string.Concat(CSI, '[', A, ';', B, 'm'); }
-        internal static string oCmd(int A, int B, int C) { return string.Concat(CSI, '[', A, ';', B, ';', C, 'm'); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string oCmd(int code) => string.Concat(CSI, '[', (int)code, 'm');
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string oCmd(int A, int B) => string.Concat(CSI, '[', A, ';', B, 'm');
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string oCmd(int A, int B, int C) => string.Concat(CSI, '[', A, ';', B, ';', C, 'm');
 
-        internal static string xCmd(int code) { return string.Concat(CSI, '[', (int)code, 'm'); }
-        internal static string xCmd(int codeA, int codeB) { return string.Concat(CSI, '[', (int)codeA, ';', (int)codeB, 'm'); }
-        internal static string xCmd(int code, byte R, byte G, byte B) { return string.Concat(CSI, '[', (int)code, ';', R, ';', G, ';', B, 'm'); }
-        internal static string xCmd(int[] codes) { return string.Concat(CSI, '[', string.Join(";", codes), 'm'); }
-        //internal static string xCmd(params object[] codes) { return string.Concat(CSI, '[', string.Join(";", codes), 'm'); }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string xCmd(int code) => string.Concat(CSI, '[', (int)code, 'm');
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string xCmd(int codeA, int codeB) => string.Concat(CSI, '[', (int)codeA, ';', (int)codeB, 'm');
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string xCmd(int code, byte R, byte G, byte B) => string.Concat(CSI, '[', (int)code, ';', R, ';', G, ';', B, 'm'); 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string xCmd(int[] codes) => string.Concat(CSI, '[', string.Join(";", codes), 'm');
 
 
-        internal static string Set_BG_Color(XTERM_COLOR color, string msg) { return xCmd((int)ANSI_CODE.SET_COLOR_BG + (int)color) + msg + COLOR_RESET; }
-        internal static string Set_BG_Color(ANSI_COLOR color, string msg) { return xCmd((int)ANSI_CODE.SET_COLOR_BG + (int)color) + msg + COLOR_RESET; }
-        internal static string Set_BG_Color_Bright(ANSI_COLOR color, string msg) { return xCmd((int)ANSI_CODE.SET_COLOR_BG_BRIGHT + (int)color) + msg + COLOR_RESET; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Set_BG_Color(XTERM_COLOR color, string msg) => xCmd((int)ANSI_CODE.SET_COLOR_BG + (int)color) + msg + COLOR_RESET;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Set_BG_Color(ANSI_COLOR color, string msg) => xCmd((int)ANSI_CODE.SET_COLOR_BG + (int)color) + msg + COLOR_RESET;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Set_BG_Color_Bright(ANSI_COLOR color, string msg) => xCmd((int)ANSI_CODE.SET_COLOR_BG_BRIGHT + (int)color) + msg + COLOR_RESET;
 
-        internal static string Set_FG_Color(XTERM_COLOR color, string msg) { return xCmd((int)ANSI_CODE.SET_COLOR_FG + (int)color) + msg + COLOR_RESET_FG; }
-        internal static string Set_FG_Color(ANSI_COLOR color, string msg) { return xCmd((int)ANSI_CODE.SET_COLOR_FG + (int)color) + msg + COLOR_RESET_FG; }
-        internal static string Set_FG_Color_Bright(ANSI_COLOR color, string msg) { return xCmd((int)ANSI_CODE.SET_COLOR_FG_BRIGHT + (int)color) + msg + COLOR_RESET_FG; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Set_FG_Color(XTERM_COLOR color, string msg) => xCmd((int)ANSI_CODE.SET_COLOR_FG + (int)color) + msg + COLOR_RESET_FG;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Set_FG_Color(ANSI_COLOR color, string msg) => xCmd((int)ANSI_CODE.SET_COLOR_FG + (int)color) + msg + COLOR_RESET_FG;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Set_FG_Color_Bright(ANSI_COLOR color, string msg) => xCmd((int)ANSI_CODE.SET_COLOR_FG_BRIGHT + (int)color) + msg + COLOR_RESET_FG;
 
         #endregion
 
@@ -248,7 +261,7 @@ namespace xLog
             List<XTERM_CODE> codes = new List<XTERM_CODE>();
             // Ok first let's grab all the CSI command codes(if any)
             DumbStringTokenizer tok = new DumbStringTokenizer(str);
-            if (tok.TryConsume(XTERM.CSI))//it's only a CSI if it starts with the Control Sequence escape character.
+            if (tok.TryConsume(ANSIColor.CSI))//it's only a CSI if it starts with the Control Sequence escape character.
             {
                 if (tok.TryConsume('['))// If '[' is right after the control char then it indicates that this is a multi-command-char sequence, AKA THE ONLY ONE ANYBODY EVER USES! (Even though there ARE other kinds) So it's the only one we care to handle
                 {
@@ -302,7 +315,7 @@ namespace xLog
         #endregion
 
         #region TERMINAL OUTPUT EMULATION
-        public static void Write(string format, params object[] args)
+        internal static void Write(string format, params object[] args)
         {
             string str = format;
             if (args.Length > 0) str = string.Format(format, args);
@@ -322,7 +335,7 @@ namespace xLog
             }
         }
 
-        public static void WriteLine(string format, params object[] args)
+        internal static void WriteLine(string format, params object[] args)
         {
             Write( format, args );
             Write( COLOR_RESET );

@@ -71,7 +71,7 @@ namespace xLog
                 }
 
                 Buffer.Clear();
-                Buffer.Append(string.Format(XTERM.yellow("{0,6:#00.00}%") + XTERM.magentaBright(" ["), Percent * 100f));// 9 chars
+                Buffer.Append(string.Format(ANSIColor.yellow("{0,6:#00.00}%") + ANSIColor.magentaBright(" ["), Percent * 100f));// 9 chars
                                                                                                                      // draw the active '=' portion of the bar
                 const int ACTIVE_SPACE = (PROG_BAR_WIDTH);
                 double progSafe = Math.Min(1.0, Math.Max(0.0, Percent));
@@ -80,9 +80,9 @@ namespace xLog
                 string active_str = new string('=', active);// always draw an arrow head to cap the active portion of the bar UNLESS it would extend past the bars end
                 if (has_cap) active_str += ">";
 
-                Buffer.Append(XTERM.cyanBright(active_str));
+                Buffer.Append(ANSIColor.cyanBright(active_str));
                 Buffer.Append(new string(' ', ACTIVE_SPACE - active_str.Length));// pad out the bar's unused space 
-                Buffer.Append(XTERM.magentaBright("]"));
+                Buffer.Append(ANSIColor.magentaBright("]"));
             
                 Line.Set(Buffer.ToString());
             }

@@ -89,7 +89,7 @@ namespace xLog
             if ( !ReferenceEquals(opts, null) && opts.Count > 0 )
             {
                 string strOpts = string.Join(", ", opts);
-                xLogEngine.Console( string.Concat(XTERM.whiteBright("Options: "), XTERM.white(strOpts)) );
+                xLogEngine.Console( string.Concat(ANSIColor.whiteBright("Options: "), ANSIColor.white(strOpts)) );
                 Update();
             }
         
@@ -99,12 +99,12 @@ namespace xLog
 
             if ( !Validate_Result(userInput) )
             {
-                xLogEngine.Console( XTERM.redBright($"Invalid Response: \"{userInput}\"") );
+                xLogEngine.Console( ANSIColor.redBright($"Invalid Response: \"{userInput}\"") );
                 Set_Input(string.Empty);
                 return await Run_Prompt_And_Translate().ConfigureAwait(false);
             }
 
-            xLogEngine.Interface(string.Empty, string.Concat(Message, XTERM.white(userInput)));
+            xLogEngine.Interface(string.Empty, string.Concat(Message, ANSIColor.white(userInput)));
             return Translate_Prompt_Result(userInput);
         }
 
@@ -197,7 +197,7 @@ namespace xLog
             }
 
             // Remove any periods from the end and any whitespace around the message
-            msg = XTERM.whiteBright( msg.TrimEnd(new char[] { ' ', '.' }) );
+            msg = ANSIColor.whiteBright( msg.TrimEnd(new char[] { ' ', '.' }) );
 
             // If the message ends with punctuation then we don't append ": "
             if ( !Char.IsPunctuation( msg.Last() ) )

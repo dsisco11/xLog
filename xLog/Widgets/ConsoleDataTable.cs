@@ -15,14 +15,14 @@ namespace xLog
                 throw new ArgumentNullException(nameof(Data));
             }
 
-            int[] ColumnSize = Data.Columns.ToList().Select(col => col.ColumnName.Length+2).ToArray();
+            int[] ColumnSize = Data.Columns.ToList().Select(col => col.ColumnName.Length + 2).ToArray();
 
             for (int i = 0; i < Data.Rows.Count; i++)
             {
                 DataRow row = Data.Rows[i];
-                for(int x=0; x<Data.Columns.Count; x++)
+                for (int x = 0; x < Data.Columns.Count; x++)
                 {
-                    ColumnSize[x] = Math.Max(ColumnSize[x], row.ItemArray[x].ToString().Length+2);
+                    ColumnSize[x] = Math.Max(ColumnSize[x], row.ItemArray[x].ToString().Length + 2);
                 }
             }
 
@@ -61,7 +61,7 @@ namespace xLog
             sb.AppendLine(string.Join("-|-", separators));
 
             // Write the data values
-            for (int y=0; y<Data.Rows.Count; y++)
+            for (int y = 0; y < Data.Rows.Count; y++)
             {
                 DataRow row = Data.Rows[y];
                 string[] colValues = new string[Data.Columns.Count];
