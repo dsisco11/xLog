@@ -6,14 +6,14 @@ using xLog.Widgets;
 
 namespace xLog.Widgets
 {
-    public class ConsolePromptEnum<T> : ConsolePromptBase<T> where T : struct, IConvertible
+    public class Widget_PromptEnum<T> : Widget_PromptBase<T> where T : struct, IConvertible
     {
         #region Properties
         IEnumerable<T> Exclude = null;
         List<string> ExcludeNames = null;
         #endregion
 
-        public ConsolePromptEnum(string Prompt_Message, T Initial_Value, IEnumerable<T> Excluded_Values = null) : base(Prompt_Message, Enum.GetName(typeof(T), Initial_Value))
+        public Widget_PromptEnum(string Prompt_Message, T Initial_Value, IEnumerable<T> Excluded_Values = null) : base(Prompt_Message, Enum.GetName(typeof(T), Initial_Value))
         {
             if (!typeof(T).IsEnum)
             {
@@ -73,7 +73,7 @@ namespace xLog.Widgets
 
         public static async Task<T> Prompt(string Prompt_Message, T Initial_Value, IEnumerable<T> Excluded_Values = null)
         {
-            using (var p = new ConsolePromptEnum<T>(Prompt_Message, Initial_Value, Excluded_Values))
+            using (var p = new Widget_PromptEnum<T>(Prompt_Message, Initial_Value, Excluded_Values))
             {
                 return await p.ConfigureAwait(false);
             }

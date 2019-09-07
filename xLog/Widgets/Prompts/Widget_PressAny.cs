@@ -8,7 +8,7 @@ namespace xLog.Widgets
     /// <summary>
     /// Outputs a "Press ANY key to continue" message and allows waiting for the user to press a key
     /// </summary>
-    public class ConsolePressAny : ConsoleWidget, IDisposable
+    public class Widget_PressAny : ConsoleWidget, IDisposable
     {
         #region Properties
         Task myTask = null;
@@ -16,7 +16,7 @@ namespace xLog.Widgets
         #endregion
 
         #region Constructors
-        public ConsolePressAny(string Message = null) : base(ConsoleWidgetType.Input)
+        public Widget_PressAny(string Message = null) : base(ConsoleWidgetType.Input)
         {
             Cancel = new CancellationTokenSource();
             myTask = Task.Run(() => Read_Input(), Cancel.Token);
@@ -62,7 +62,7 @@ namespace xLog.Widgets
 
         public static async Task Prompt(string Message = null)
         {
-            using (var p = new ConsolePressAny(Message))
+            using (var p = new Widget_PressAny(Message))
             {
                 await p.ConfigureAwait(false);
             }

@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace xLog.Widgets
 {
-    public class ConsoleProgressBar : ConsoleWidget
+    public class Widget_ProgressBar : ConsoleWidget
     {
         /// <summary>
         /// Maximum number of history samples to use when calculating ETA
@@ -17,7 +17,7 @@ namespace xLog.Widgets
         //private bool Disposed = false;
         //private StringBuilder Buffer = new StringBuilder();
 
-        public ConsoleProgressBar() : base(ConsoleWidgetType.Progress)
+        public Widget_ProgressBar() : base(ConsoleWidgetType.Progress)
         {
             Set_Progress(0);
         }
@@ -90,7 +90,7 @@ namespace xLog.Widgets
 
         public static void Test()
         {
-            ConsoleProgressBar prog = new ConsoleProgressBar();
+            Widget_ProgressBar prog = new Widget_ProgressBar();
             float progress = 0f;
             while (progress < 1)
             {
@@ -99,7 +99,7 @@ namespace xLog.Widgets
                 Thread.Sleep(1000);
             }
 
-            ConsolePressAny.Prompt().Wait();
+            Widget_PressAny.Prompt().Wait();
             Environment.Exit(0);
         }
     }

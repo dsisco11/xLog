@@ -24,7 +24,7 @@ namespace xLog.Widgets
     /// <returns>Input Valid. If <c>False</c>, prompt will be repeated.</returns>
     public delegate bool PromptResultValidatorDelegate(string UserInput);
 
-    public abstract class ConsolePromptBase<Ty> : ConsoleWidget
+    public abstract class Widget_PromptBase<Ty> : ConsoleWidget
     {
 
         #region Properties
@@ -49,7 +49,7 @@ namespace xLog.Widgets
         #endregion
 
         #region Constructors
-        protected ConsolePromptBase(string Prompt_Message, string Initial_Value = null, PromptInputValidatorDelegate input_validator = null, PromptResultValidatorDelegate result_validator = null, bool Conceal_Input = false) : base(ConsoleWidgetType.Input)
+        protected Widget_PromptBase(string Prompt_Message, string Initial_Value = null, PromptInputValidatorDelegate input_validator = null, PromptResultValidatorDelegate result_validator = null, bool Conceal_Input = false) : base(ConsoleWidgetType.Input)
         {
             Set_Message(Prompt_Message);
             Set_Input(Initial_Value ?? string.Empty);

@@ -1367,17 +1367,6 @@
             </summary>
             <param name="Text"></param>
         </member>
-        <member name="F:xLog.Widgets.ConsoleProgressBar.MAX_HIST">
-            <summary>
-            Maximum number of history samples to use when calculating ETA
-            </summary>
-        </member>
-        <member name="M:xLog.Widgets.ConsoleProgressBar.Set_Progress(System.Double)">
-            <summary>
-            Sets the progress being displayed to a new value
-            </summary>
-            <param name="Percent">Progress percentage in the [0.0 - 1.0] range</param>
-        </member>
         <member name="T:xLog.Widgets.ConsoleWidget">
             <summary>
             Basis for a generic console text based tool used for displaying some form of information.
@@ -1408,7 +1397,18 @@
             Anything accepting user input.
             </summary>
         </member>
-        <member name="T:xLog.Widgets.ConsolePressAny">
+        <member name="F:xLog.Widgets.Widget_ProgressBar.MAX_HIST">
+            <summary>
+            Maximum number of history samples to use when calculating ETA
+            </summary>
+        </member>
+        <member name="M:xLog.Widgets.Widget_ProgressBar.Set_Progress(System.Double)">
+            <summary>
+            Sets the progress being displayed to a new value
+            </summary>
+            <param name="Percent">Progress percentage in the [0.0 - 1.0] range</param>
+        </member>
+        <member name="T:xLog.Widgets.Widget_PressAny">
             <summary>
             Outputs a "Press ANY key to continue" message and allows waiting for the user to press a key
             </summary>
@@ -1429,28 +1429,28 @@
             <param name="UserInput">The complete user input string</param>
             <returns>Input Valid. If <c>False</c>, prompt will be repeated.</returns>
         </member>
-        <member name="F:xLog.Widgets.ConsolePromptBase`1.Message">
+        <member name="F:xLog.Widgets.Widget_PromptBase`1.Message">
             <summary>
             The prompt message
             </summary>
         </member>
-        <member name="F:xLog.Widgets.ConsolePromptBase`1.ConcealInput">
+        <member name="F:xLog.Widgets.Widget_PromptBase`1.ConcealInput">
             <summary>
             If true then characters in the user input string will be replaced with the masking character
             </summary>
         </member>
-        <member name="F:xLog.Widgets.ConsolePromptBase`1.CursorPos">
+        <member name="F:xLog.Widgets.Widget_PromptBase`1.CursorPos">
             <summary>
             Console cursor position
             </summary>
         </member>
-        <member name="M:xLog.Widgets.ConsolePromptBase`1.Set_Input(System.String)">
+        <member name="M:xLog.Widgets.Widget_PromptBase`1.Set_Input(System.String)">
             <summary>
             Sets the complete user input string value
             </summary>
             <param name="Input"></param>
         </member>
-        <member name="T:xLog.Widgets.ConsolePromptBool">
+        <member name="T:xLog.Widgets.Widget_PromptBool">
             <summary>
             Prompts the user for a boolean (yes/no) response
             </summary>

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace xLog.Widgets
 {
-    public static class ConsoleDataTable
+    public static class Widget_DataTable
     {
         public static string Stringify(DataTable Data, int MaxColumnSize = 0)
         {

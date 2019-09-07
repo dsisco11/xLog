@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 
 namespace xLog.Widgets
 {
-    public class ConsolePromptInteger : ConsolePromptBase<int>
+    public class Widget_PromptInteger : Widget_PromptBase<int>
     {
-        public ConsolePromptInteger(string Prompt_Message, int? Initial_Value = null) : base(Prompt_Message, Initial_Value.HasValue ? Initial_Value.Value.ToString() : null)
+        public Widget_PromptInteger(string Prompt_Message, int? Initial_Value = null) : base(Prompt_Message, Initial_Value.HasValue ? Initial_Value.Value.ToString() : null)
         {
         }
 
@@ -16,7 +16,7 @@ namespace xLog.Widgets
 
         public static async Task<int> Prompt(string Prompt_Message, int? Initial_Value = null)
         {
-            using (var p = new ConsolePromptInteger(Prompt_Message, Initial_Value))
+            using (var p = new Widget_PromptInteger(Prompt_Message, Initial_Value))
             {
                 return await p.ConfigureAwait(false);
             }

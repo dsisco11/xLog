@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace xLog.Widgets
 {
-    public class ConsoleCountdown : ConsoleWidget, IDisposable
+    public class Widget_Countdown : ConsoleWidget, IDisposable
     {
         #region Properties
         private DateTime TargetTime;
@@ -14,7 +14,7 @@ namespace xLog.Widgets
         private string Title = null;
         #endregion
 
-        public ConsoleCountdown(DateTime EndTime, string title = null) : base(ConsoleWidgetType.Timer)
+        public Widget_Countdown(DateTime EndTime, string title = null) : base(ConsoleWidgetType.Timer)
         {
             TargetTime = EndTime;
             Title = title;
@@ -22,7 +22,7 @@ namespace xLog.Widgets
             Start_Updater();
         }
 
-        public ConsoleCountdown(TimeSpan Duration, string title = null) : base(ConsoleWidgetType.Timer)
+        public Widget_Countdown(TimeSpan Duration, string title = null) : base(ConsoleWidgetType.Timer)
         {
             TargetTime = DateTime.UtcNow.Add(Duration);
             Title = title;
@@ -95,11 +95,11 @@ namespace xLog.Widgets
 
         public static void Test()
         {
-            ConsoleCountdown widget = new ConsoleCountdown(TimeSpan.FromSeconds(20), ANSIColor.cyanBright("Countdown"));
+            Widget_Countdown widget = new Widget_Countdown(TimeSpan.FromSeconds(20), ANSIColor.cyanBright("Countdown"));
 
             Task.WaitAll(widget.Get_Task());
 
-            using (ConsolePrompt prompt = new ConsolePrompt("Press ANY key to exit."))
+            using (Widget_Prompt prompt = new Widget_Prompt("Press ANY key to exit."))
             {
                 prompt.Wait();
             }

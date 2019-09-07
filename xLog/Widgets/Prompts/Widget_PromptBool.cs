@@ -8,9 +8,9 @@ namespace xLog.Widgets
     /// <summary>
     /// Prompts the user for a boolean (yes/no) response
     /// </summary>
-    public class ConsolePromptBool : ConsolePromptBase<bool>
+    public class Widget_PromptBool : Widget_PromptBase<bool>
     {
-        public ConsolePromptBool(string Prompt_Message, string Initial_Value = null) : base(Prompt_Message, Initial_Value)
+        public Widget_PromptBool(string Prompt_Message, string Initial_Value = null) : base(Prompt_Message, Initial_Value)
         {
         }
 
@@ -38,7 +38,7 @@ namespace xLog.Widgets
 
         public static async Task<bool> Prompt(string Prompt_Message, string Initial_Value = null)
         {
-            using (var p = new ConsolePromptBool(Prompt_Message, Initial_Value))
+            using (var p = new Widget_PromptBool(Prompt_Message, Initial_Value))
             {
                 return await p.ConfigureAwait(false);
             }

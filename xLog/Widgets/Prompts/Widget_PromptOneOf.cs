@@ -3,14 +3,14 @@ using System.Threading.Tasks;
 
 namespace xLog.Widgets
 {
-    public class ConsolePromptOneOf : ConsolePromptBase<string>
+    public class Widget_PromptOneOf : Widget_PromptBase<string>
     {
         #region Properties
         private IEnumerable<string> Options;
         #endregion
 
         #region Constructors
-        public ConsolePromptOneOf(string Prompt_Message, IEnumerable<string> Options, string Initial_Value = null) : base(Prompt_Message, Initial_Value)
+        public Widget_PromptOneOf(string Prompt_Message, IEnumerable<string> Options, string Initial_Value = null) : base(Prompt_Message, Initial_Value)
         {
             this.Options = Options;
         }
@@ -24,7 +24,7 @@ namespace xLog.Widgets
 
         public static async Task<string> Prompt(string Prompt_Message, IEnumerable<string> Options, string Initial_Value = null)
         {
-            using (var p = new ConsolePromptOneOf(Prompt_Message, Options, Initial_Value))
+            using (var p = new Widget_PromptOneOf(Prompt_Message, Options, Initial_Value))
             {
                 return await p.ConfigureAwait(false);
             }

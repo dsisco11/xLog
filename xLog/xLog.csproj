@@ -7,19 +7,20 @@
     <Company>xLog</Company>
     <RepositoryUrl>https://github.com/dsisco11/xLog</RepositoryUrl>
     <PackageProjectUrl>https://github.com/dsisco11/xLog</PackageProjectUrl>
-    <PackageTags>Logger, XTERM, Multithreaded, Threadsafe</PackageTags>
-    <Description>A multithreaded logging system which allows colored console output on windows via ANSI color code interpretation.</Description>
+    <PackageTags>Logger, XTERM, ANSI, Console, Color, Multithreaded, Threadsafe</PackageTags>
+    <Description>A multithreaded logging system which allows colored console output on windows via ANSI color code interpretation.
+Also includes helpful widgets for console UIs like; progress bars, spinners, countdowns, &amp; type restricted user prompts.</Description>
     <Copyright />
     <PackageId>Sisco.LogEngine</PackageId>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    <Version>1.0.3</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath></OutputPath>
     <DocumentationFile>G:\CODE\xLog\xLog\xLog.xml</DocumentationFile>
-    <DebugType>full</DebugType>
+    <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
