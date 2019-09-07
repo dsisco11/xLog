@@ -2,7 +2,7 @@
 
 namespace xLog
 {
-    public struct XTERM_BLOCK
+    internal struct XTERM_BLOCK
     {
         public List<XTERM_CODE> Codes;
         public string TEXT;
