@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using xLog.Widgets;
 
-namespace xLog
+namespace xLog.Widgets
 {
     public class ConsolePromptEnum<T> : ConsolePromptBase<T> where T : struct, IConvertible
     {
@@ -37,7 +38,7 @@ namespace xLog
             bool valid = Get_Valid_Options().ToList().Contains(userInput, StringComparer.CurrentCultureIgnoreCase);
             if (valid && !ReferenceEquals(Exclude, null) && Exclude.Count() > 0)
             {
-                if( Exclude.Contains((T)Enum.Parse(typeof(T), userInput)) )
+                if (Exclude.Contains((T)Enum.Parse(typeof(T), userInput)))
                 {
                     return false;
                 }
@@ -49,7 +50,7 @@ namespace xLog
         protected override T Translate_Prompt_Result(string userInput)
         {
             object choice = null;
-            if ( Get_Valid_Options().Contains(userInput, StringComparer.CurrentCultureIgnoreCase) )
+            if (Get_Valid_Options().Contains(userInput, StringComparer.CurrentCultureIgnoreCase))
             {
                 try
                 {

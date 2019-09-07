@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
+using xLog.Widgets;
 
 namespace xLog
 {

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace xLog
+namespace xLog.Widgets
 {
     /// <summary>
     /// Outputs a "Press ANY key to continue" message and allows waiting for the user to press a key
@@ -24,7 +24,7 @@ namespace xLog
             if (string.IsNullOrWhiteSpace(Message))
                 Message = "Press ANY key to continue";
 
-            Line.Set( Message );
+            Line.Set(Message);
         }
 
         public override void Dispose()
@@ -51,7 +51,7 @@ namespace xLog
         {
             Console.ReadKey(true);
         }
-    
+
         #region Task Implementation
         public Task ToTask() => myTask;
         public TaskAwaiter GetAwaiter() => myTask.GetAwaiter();

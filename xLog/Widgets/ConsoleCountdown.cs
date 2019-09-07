@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace xLog
+namespace xLog.Widgets
 {
     public class ConsoleCountdown : ConsoleWidget, IDisposable
     {

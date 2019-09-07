@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using xLog.Widgets;
 
-namespace xLog
+namespace xLog.Widgets
 {
     /// <summary>
     /// Prompts the user for a boolean (yes/no) response
@@ -22,7 +23,7 @@ namespace xLog
         protected override bool Translate_Prompt_Result(string userInput)
         {
             // We translate any input where the first character is upper/lowercase 'y' to yes, all others are false.
-            return (!string.IsNullOrWhiteSpace(userInput) && userInput.ToUpper()[0] == 'Y');
+            return !string.IsNullOrWhiteSpace(userInput) && userInput.ToUpper()[0] == 'Y';
         }
 
         protected override bool Validate_Result(string userInput)

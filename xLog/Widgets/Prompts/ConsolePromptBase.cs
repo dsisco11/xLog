@@ -4,8 +4,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using xLog.Widgets;
 
-namespace xLog
+namespace xLog.Widgets
 {
     /// <summary>
     /// Delegate describing functions which can validate user input for the logging systems prompt functions.
@@ -41,7 +42,7 @@ namespace xLog
         /// Console cursor position
         /// </summary>
         int CursorPos = 0;
-    
+
         Task<Ty> myTask = null;
         CancellationTokenSource taskCancel;
 
@@ -58,7 +59,7 @@ namespace xLog
             ResultValidator = result_validator;
 
             taskCancel = new CancellationTokenSource();
-            myTask = Task<Ty>.Run(Run_Prompt_And_Translate, taskCancel.Token);
+            myTask = Task.Run(Run_Prompt_And_Translate, taskCancel.Token);
         }
 
         public override void Dispose()
@@ -86,20 +87,20 @@ namespace xLog
         private async Task<Ty> Run_Prompt_And_Translate()
         {
             List<string> opts = Get_Valid_Options()?.ToList();
-            if ( !ReferenceEquals(opts, null) && opts.Count > 0 )
+            if (!ReferenceEquals(opts, null) && opts.Count > 0)
             {
                 string strOpts = string.Join(", ", opts);
-                xLogEngine.Console( string.Concat(ANSIColor.whiteBright("Options: "), ANSIColor.white(strOpts)) );
+                xLogEngine.Console(string.Concat(ANSIColor.whiteBright("Options: "), ANSIColor.white(strOpts)));
                 Update();
             }
-        
+
             string userInput = Run_Prompt();
             if (taskCancel.IsCancellationRequested)
-                return default(Ty);
+                return default;
 
-            if ( !Validate_Result(userInput) )
+            if (!Validate_Result(userInput))
             {
-                xLogEngine.Console( ANSIColor.redBright($"Invalid Response: \"{userInput}\"") );
+                xLogEngine.Console(ANSIColor.redBright($"Invalid Response: \"{userInput}\""));
                 Set_Input(string.Empty);
                 return await Run_Prompt_And_Translate().ConfigureAwait(false);
             }
@@ -128,8 +129,8 @@ namespace xLog
 
         async Task<Ty> Start()
         {
-            if (Interlocked.Equals(Disposed, 1))
-                return default(Ty);
+            if (Equals(Disposed, 1))
+                return default;
 
             Ty result = await myTask.ConfigureAwait(false);
             // Print the users input value
@@ -197,10 +198,10 @@ namespace xLog
             }
 
             // Remove any periods from the end and any whitespace around the message
-            msg = ANSIColor.whiteBright( msg.TrimEnd(new char[] { ' ', '.' }) );
+            msg = ANSIColor.whiteBright(msg.TrimEnd(new char[] { ' ', '.' }));
 
             // If the message ends with punctuation then we don't append ": "
-            if ( !Char.IsPunctuation( msg.Last() ) )
+            if (!char.IsPunctuation(msg.Last()))
             {
                 msg = string.Concat(msg, ": ");
             }
@@ -214,7 +215,7 @@ namespace xLog
         /// <param name="Input"></param>
         void Set_Input(string Input)
         {
-            if (Interlocked.Equals(Disposed, 1))
+            if (Equals(Disposed, 1))
                 return;
 
             Buffer.Clear();
@@ -225,7 +226,7 @@ namespace xLog
 
         void Set_Cursor(int pos)
         {
-            if (Interlocked.Equals(Disposed, 1))
+            if (Equals(Disposed, 1))
                 return;
 
             pos = Math.Max(0, Math.Min(Buffer.Length, pos));
@@ -238,7 +239,7 @@ namespace xLog
 
         void Handle_Input_Key(ConsoleKeyInfo key)
         {
-            if (Interlocked.Equals(Disposed, 1))
+            if (Equals(Disposed, 1))
                 return;
 
             switch (key.Key)
@@ -267,12 +268,12 @@ namespace xLog
                     break;
                 default:
                     string Post = string.Concat(Buffer.ToString(), key.KeyChar);
-                    if ( !Validate_Input(Buffer.ToString(), Post, key) )
+                    if (!Validate_Input(Buffer.ToString(), Post, key))
                     {
                         return;
                     }
 
-                    if (key.KeyChar != '\u0000' && !Char.IsControl(key.KeyChar))
+                    if (key.KeyChar != '\u0000' && !char.IsControl(key.KeyChar))
                     {
                         Buffer.Insert(CursorPos++, key.KeyChar);// Add users input to the input buffer
                     }
@@ -282,14 +283,14 @@ namespace xLog
 
         void Update()
         {
-            if (Interlocked.Equals(Disposed, 1))
+            if (Equals(Disposed, 1))
                 return;
 
             lock (Line)
             {
                 // Update input
                 string displayedInput = ConcealInput ? new string('*', Buffer.Length) : Buffer.ToString();// Apply input masking if needed
-                Line.Set( string.Concat(Message, displayedInput) );// Update the userinput display line
+                Line.Set(string.Concat(Message, displayedInput));// Update the userinput display line
             }
         }
 

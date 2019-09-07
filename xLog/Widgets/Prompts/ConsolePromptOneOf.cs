@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace xLog
+namespace xLog.Widgets
 {
     public class ConsolePromptOneOf : ConsolePromptBase<string>
     {
         #region Properties
         private IEnumerable<string> Options;
-    #endregion
+        #endregion
 
         #region Constructors
         public ConsolePromptOneOf(string Prompt_Message, IEnumerable<string> Options, string Initial_Value = null) : base(Prompt_Message, Initial_Value)

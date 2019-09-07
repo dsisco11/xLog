@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace xLog
+namespace xLog.Widgets
 {
     public class ConsoleProgressBar : ConsoleWidget
     {
@@ -21,14 +21,14 @@ namespace xLog
         {
             Set_Progress(0);
         }
-    
+
 
         protected TimeSpan Get_ETA()
         {
             TimeSpan sum = new TimeSpan();
             float dt = 0f;
 
-            foreach(var tuple in History)
+            foreach (var tuple in History)
             {
                 sum = sum.Add(tuple.Item1);
                 dt += tuple.Item2;
@@ -39,13 +39,13 @@ namespace xLog
             double ms = sum.TotalMilliseconds / MAX_HIST;
             float avg = dt / MAX_HIST;
             // find how much longer it will take at this rate.
-            float remain = (1f - LastPct);
-            float cycles = (remain / avg);
+            float remain = 1f - LastPct;
+            float cycles = remain / avg;
 
-            double ms_remain = (ms * cycles);
+            double ms_remain = ms * cycles;
             return new TimeSpan(0, 0, 0, 0, (int)ms_remain);
         }
-    
+
         /// <summary>
         /// Sets the progress being displayed to a new value
         /// </summary>
@@ -54,7 +54,7 @@ namespace xLog
         {
             lock (Line)
             {
-                if (Interlocked.Equals(Disposed, 1))
+                if (Equals(Disposed, 1))
                 {
                     return;
                 }
@@ -72,22 +72,22 @@ namespace xLog
 
                 Buffer.Clear();
                 Buffer.Append(string.Format(ANSIColor.yellow("{0,6:#00.00}%") + ANSIColor.magentaBright(" ["), Percent * 100f));// 9 chars
-                                                                                                                     // draw the active '=' portion of the bar
-                const int ACTIVE_SPACE = (PROG_BAR_WIDTH);
+                                                                                                                                // draw the active '=' portion of the bar
+                const int ACTIVE_SPACE = PROG_BAR_WIDTH;
                 double progSafe = Math.Min(1.0, Math.Max(0.0, Percent));
                 int active = (int)(progSafe * ACTIVE_SPACE);
-                bool has_cap = (active < ACTIVE_SPACE);
+                bool has_cap = active < ACTIVE_SPACE;
                 string active_str = new string('=', active);// always draw an arrow head to cap the active portion of the bar UNLESS it would extend past the bars end
                 if (has_cap) active_str += ">";
 
                 Buffer.Append(ANSIColor.cyanBright(active_str));
                 Buffer.Append(new string(' ', ACTIVE_SPACE - active_str.Length));// pad out the bar's unused space 
                 Buffer.Append(ANSIColor.magentaBright("]"));
-            
+
                 Line.Set(Buffer.ToString());
             }
         }
-    
+
         public static void Test()
         {
             ConsoleProgressBar prog = new ConsoleProgressBar();
@@ -96,7 +96,7 @@ namespace xLog
             {
                 progress += 0.1f;
                 prog.Set_Progress(progress);
-                System.Threading.Thread.Sleep(1000);
+                Thread.Sleep(1000);
             }
 
             ConsolePressAny.Prompt().Wait();

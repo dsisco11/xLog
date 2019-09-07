@@ -1,7 +1,7 @@
 ﻿
 using System.Threading.Tasks;
 
-namespace xLog
+namespace xLog.Widgets
 {
     public class ConsolePromptInteger : ConsolePromptBase<int>
     {

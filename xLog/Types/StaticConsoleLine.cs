@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace xLog
+namespace xLog.Widgets
 {
     /// <summary>
     /// Manages access to static console lines provided by the logging system.
@@ -56,8 +56,8 @@ namespace xLog
 
         public void Dispose()
         {
-            xLogEngine.Unregister_Static_Line( this );
-            GC.SuppressFinalize( this );
+            xLogEngine.Unregister_Static_Line(this);
+            GC.SuppressFinalize(this);
         }
         #endregion
 

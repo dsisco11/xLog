@@ -1,5 +1,4 @@
-﻿
-namespace xLog
+﻿namespace xLog.Widgets
 {
     public enum ConsoleWidgetType
     {

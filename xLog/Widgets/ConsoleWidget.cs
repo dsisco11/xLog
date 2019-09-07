@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading;
 
-namespace xLog
+namespace xLog.Widgets
 {
     /// <summary>
     /// Basis for a generic console text based tool used for displaying some form of information.

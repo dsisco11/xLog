@@ -1,9 +1,10 @@
 ﻿using System;
-//using Mono.Unix;
-//using Mono.Unix.Native;
 
 namespace xLog
 {
+    /// <summary>
+    /// Contains helpful functions for performing complex UI related operations on console output
+    /// </summary>
     public static class ConsoleExt
     {
         #region Console Control Handler
@@ -79,6 +80,11 @@ namespace xLog
         }
 
         #region Progress Bar
+        /// <summary>
+        /// Creates a progress bar at the current console cursor position and returns that position so the progress bar may be continually updated.
+        /// </summary>
+        /// <param name="percent"></param>
+        /// <returns></returns>
         public static ConsoleLinePos Progress(float percent)
         {
             ConsoleLinePos pos = new ConsoleLinePos() { Y = Console.CursorTop, X = Console.CursorLeft };
