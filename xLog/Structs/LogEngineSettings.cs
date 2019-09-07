@@ -1,6 +1,9 @@
 ﻿
 namespace xLog
 {
+    /// <summary>
+    /// Settings for the entire logging system
+    /// </summary>
     public class LogEngineSettings
     {
         /// <summary>
