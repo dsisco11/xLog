@@ -383,6 +383,23 @@
             Releases all logging system resources permanently
             </summary>
         </member>
+        <member name="M:xLog.xLogEngine.AddConsumer(xLog.ILogLineConsumer)">
+            <summary>
+            Adds a log line consumer to the list of consumers which receive lines output by the logger
+            </summary>
+            <param name="consumer"></param>
+        </member>
+        <member name="M:xLog.xLogEngine.RemoveConsumer(xLog.ILogLineConsumer)">
+            <summary>
+            Removes a log line consumer from the list of consumers which receive lines output by the logger
+            </summary>
+            <param name="consumer"></param>
+        </member>
+        <member name="M:xLog.xLogEngine.Get_Todays_LogFile_Name">
+            <summary>
+            Returns the name of a log-file dated with the current date
+            </summary>
+        </member>
         <member name="M:xLog.xLogEngine.Finalize_Log_FileName(System.String)">
             <summary>
             Finalizes a given log filename by ensuring the specified Log_Directory and Log_File_Ext are attached to the path.

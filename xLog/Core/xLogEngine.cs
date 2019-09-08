@@ -121,7 +121,7 @@ namespace xLog
         private static void Shutdown()
         {
             Info("Goodbye!");
-            onShutdown.Invoke();
+            onShutdown?.Invoke();
             Dispose();
         }
 
@@ -328,6 +328,10 @@ namespace xLog
         #endregion
 
         #region Consumers
+        /// <summary>
+        /// Adds a log line consumer to the list of consumers which receive lines output by the logger
+        /// </summary>
+        /// <param name="consumer"></param>
         public static void AddConsumer(ILogLineConsumer consumer)
         {
             if (object.ReferenceEquals(consumer, null))
@@ -339,6 +343,10 @@ namespace xLog
             }
         }
 
+        /// <summary>
+        /// Removes a log line consumer from the list of consumers which receive lines output by the logger
+        /// </summary>
+        /// <param name="consumer"></param>
         public static void RemoveConsumer(ILogLineConsumer consumer)
         {
             if (object.ReferenceEquals(consumer, null))
@@ -352,7 +360,10 @@ namespace xLog
         #endregion
 
         #region Logging Startup
-        public static string Get_Todays_LogFile() { return string.Concat(Now.ToString(xLogEngine.Settings.LogFile_Date_Format), xLogEngine.Settings.Log_File_Ext); }
+        /// <summary>
+        /// Returns the name of a log-file dated with the current date
+        /// </summary>
+        public static string Get_Todays_LogFile_Name() { return string.Concat(Now.ToString(xLogEngine.Settings.LogFile_Date_Format), xLogEngine.Settings.Log_File_Ext); }
 
         /// <summary>
         /// Finalizes a given log filename by ensuring the specified Log_Directory and Log_File_Ext are attached to the path.
@@ -379,7 +390,7 @@ namespace xLog
         /// </summary>
         public static void Begin()
         {
-            Resume(Get_Todays_LogFile());
+            Resume(Get_Todays_LogFile_Name());
 
             DateTime today = Now.Date;
             DateTime tomorrow = Now.AddDays(1);
@@ -390,7 +401,7 @@ namespace xLog
             TimeSpan dt = tomorrow.Subtract(today);
             Timing.setTimeout(dt, () =>
             {
-                Banner(ELogLevel.Info, nameof(xLogEngine), "SWITCHING LOG FILES -> {0}", Get_Todays_LogFile());
+                Banner(ELogLevel.Info, nameof(xLogEngine), "SWITCHING LOG FILES -> {0}", Get_Todays_LogFile_Name());
                 Begin();
             });
         }
