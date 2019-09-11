@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using xLog.Widgets.Prompts;
 
 namespace xLog.Widgets
 {
@@ -71,7 +72,7 @@ namespace xLog.Widgets
                 }
 
                 Buffer.Clear();
-                Buffer.Append(string.Format(ANSIColor.yellow("{0,6:#00.00}%") + ANSIColor.magentaBright(" ["), Percent * 100f));// 9 chars
+                Buffer.Append(string.Format(ANSI.Yellow("{0,6:#00.00}%") + ANSI.MagentaBright(" ["), Percent * 100f));// 9 chars
                                                                                                                                 // draw the active '=' portion of the bar
                 const int ACTIVE_SPACE = PROG_BAR_WIDTH;
                 double progSafe = Math.Min(1.0, Math.Max(0.0, Percent));
@@ -80,9 +81,9 @@ namespace xLog.Widgets
                 string active_str = new string('=', active);// always draw an arrow head to cap the active portion of the bar UNLESS it would extend past the bars end
                 if (has_cap) active_str += ">";
 
-                Buffer.Append(ANSIColor.cyanBright(active_str));
+                Buffer.Append(ANSI.CyanBright(active_str));
                 Buffer.Append(new string(' ', ACTIVE_SPACE - active_str.Length));// pad out the bar's unused space 
-                Buffer.Append(ANSIColor.magentaBright("]"));
+                Buffer.Append(ANSI.MagentaBright("]"));
 
                 Line.Set(Buffer.ToString());
             }

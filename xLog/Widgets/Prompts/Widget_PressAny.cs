@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace xLog.Widgets
+namespace xLog.Widgets.Prompts
 {
     /// <summary>
     /// Outputs a "Press ANY key to continue" message and allows waiting for the user to press a key

@@ -285,7 +285,7 @@ namespace xLog
                 {
                     if ( !Settings.AllowColorCodes )
                     {
-                        line.Text = ANSIColor.Strip( line.Text );
+                        line.Text = ANSI.Strip( line.Text.AsMemory() );
                     }
 
                     // Consumer output
@@ -296,7 +296,7 @@ namespace xLog
                         // We test to make sure AllowColorCodes is true here to avoid performing the color strip twice.
                         if (!Settings.AllowConsumerColorCodes && Settings.AllowColorCodes)
                         {
-                            FormattedString = ANSIColor.Strip(FormattedString);
+                            FormattedString = ANSI.Strip(FormattedString.AsMemory());
                         }
 
                         foreach (ILogLineConsumer consumer in Consumers)
@@ -311,7 +311,7 @@ namespace xLog
                     {
                         if (Settings.AllowColorCodes )
                         {
-                            ANSIColor.WriteLine( line.Text );
+                            ANSI.WriteLine( line.Text.AsMemory());
                         }
                         else
                         {
@@ -615,7 +615,7 @@ namespace xLog
             //if (Stream != null && level >= FileLogLevel) Stream.Write(formattedString);
             if (level >= xLogEngine.Settings.OutputLevel)
             {
-                ANSIColor.Write(formattedString);
+                ANSI.Write(formattedString.AsMemory());
             }
         }
 
@@ -784,7 +784,7 @@ namespace xLog
         {
             if (!string.IsNullOrEmpty(line.Buffer))
             {
-                ANSIColor.Write(line.Buffer);
+                ANSI.Write(line.Buffer.AsMemory());
                 line.Current_Display_Length = line.Buffer.Length;
                 Static_Display_Stack.Push(line);
             }

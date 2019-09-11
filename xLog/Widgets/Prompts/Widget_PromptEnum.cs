@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using xLog.Widgets;
 
-namespace xLog.Widgets
+namespace xLog.Widgets.Prompts
 {
     public class Widget_PromptEnum<T> : Widget_PromptBase<T> where T : struct, IConvertible
     {
@@ -47,7 +47,7 @@ namespace xLog.Widgets
             return valid;
         }
 
-        protected override T Translate_Prompt_Result(string userInput)
+        protected override T Translate_UserInput(string userInput)
         {
             object choice = null;
             if (Get_Valid_Options().Contains(userInput, StringComparer.CurrentCultureIgnoreCase))

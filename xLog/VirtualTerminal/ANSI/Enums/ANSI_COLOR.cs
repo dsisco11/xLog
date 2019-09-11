@@ -1,7 +1,7 @@
 ﻿
 namespace xLog
 {
-    public enum XTERM_COLOR : uint
+    public enum ANSI_COLOR : int
     {
         BLACK = 0,
         RED,

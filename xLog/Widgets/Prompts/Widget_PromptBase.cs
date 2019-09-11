@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using xLog.Widgets;
 
-namespace xLog.Widgets
+namespace xLog.Widgets.Prompts
 {
     /// <summary>
     /// Delegate describing functions which can validate user input for the logging systems prompt functions.
@@ -24,9 +25,9 @@ namespace xLog.Widgets
     /// <returns>Input Valid. If <c>False</c>, prompt will be repeated.</returns>
     public delegate bool PromptResultValidatorDelegate(string UserInput);
 
+
     public abstract class Widget_PromptBase<Ty> : ConsoleWidget
     {
-
         #region Properties
         /// <summary>
         /// The prompt message
@@ -36,16 +37,18 @@ namespace xLog.Widgets
         /// If true then characters in the user input string will be replaced with the masking character
         /// </summary>
         bool ConcealInput = false;
-        PromptInputValidatorDelegate InputValidator = null;
-        PromptResultValidatorDelegate ResultValidator = null;
         /// <summary>
         /// Console cursor position
         /// </summary>
         int CursorPos = 0;
 
-        Task<Ty> myTask = null;
+        PromptInputValidatorDelegate InputValidator = null;
+        PromptResultValidatorDelegate ResultValidator = null;
+
+        Task<Ty> promptTask = null;
         CancellationTokenSource taskCancel;
 
+        protected StringBuilder UserInput => Buffer;
         #endregion
 
         #region Constructors
@@ -59,18 +62,18 @@ namespace xLog.Widgets
             ResultValidator = result_validator;
 
             taskCancel = new CancellationTokenSource();
-            myTask = Task.Run(Run_Prompt_And_Translate, taskCancel.Token);
+            promptTask = Task.Run(Run_Prompt_And_Translate_Async, taskCancel.Token);
         }
 
         public override void Dispose()
         {
-            if (myTask != null)
+            if (promptTask != null)
             {
                 taskCancel.Cancel();
-                myTask.Wait();
+                promptTask.Wait();
 
-                myTask.Dispose();
-                myTask = null;
+                promptTask.Dispose();
+                promptTask = null;
             }
 
             if (taskCancel != null)
@@ -84,13 +87,15 @@ namespace xLog.Widgets
         #endregion
 
         #region Prompt Loop
-        private async Task<Ty> Run_Prompt_And_Translate()
+
+        public Ty Run_Prompt_And_Translate()
         {
+            BEGINNING:
             List<string> opts = Get_Valid_Options()?.ToList();
             if (!ReferenceEquals(opts, null) && opts.Count > 0)
             {
                 string strOpts = string.Join(", ", opts);
-                xLogEngine.Console(string.Concat(ANSIColor.whiteBright("Options: "), ANSIColor.white(strOpts)));
+                xLogEngine.Console(string.Concat(ANSI.WhiteBright("Options: "), ANSI.White(strOpts)));
                 Update();
             }
 
@@ -100,22 +105,54 @@ namespace xLog.Widgets
 
             if (!Validate_Result(userInput))
             {
-                xLogEngine.Console(ANSIColor.redBright($"Invalid Response: \"{userInput}\""));
+                xLogEngine.Console(ANSI.RedBright($"Invalid Response: \"{userInput}\""));
                 Set_Input(string.Empty);
-                return await Run_Prompt_And_Translate().ConfigureAwait(false);
+                goto BEGINNING;
             }
 
-            xLogEngine.Interface(string.Empty, string.Concat(Message, ANSIColor.white(userInput)));
-            return Translate_Prompt_Result(userInput);
+            xLogEngine.Interface(string.Empty, string.Concat(Message, ANSI.White(userInput)));
+            return Translate_UserInput(userInput);
         }
 
-        private string Run_Prompt()
+        private async Task<Ty> Run_Prompt_And_Translate_Async()
+        {
+            List<string> opts = Get_Valid_Options()?.ToList();
+            if (!ReferenceEquals(opts, null) && opts.Count > 0)
+            {
+                string strOpts = string.Join(", ", opts);
+                xLogEngine.Console(string.Concat(ANSI.WhiteBright("Options: "), ANSI.White(strOpts)));
+                Update();
+            }
+
+            string userInput = Run_Prompt();
+            if (taskCancel.IsCancellationRequested)
+                return default;
+
+            if (!Validate_Result(userInput))
+            {
+                xLogEngine.Console(ANSI.RedBright($"Invalid Response: \"{userInput}\""));
+                Set_Input(string.Empty);
+                return await Run_Prompt_And_Translate_Async().ConfigureAwait(false);
+            }
+
+            xLogEngine.Interface(string.Empty, string.Concat(Message, ANSI.White(userInput)));
+            return Translate_UserInput(userInput);
+        }
+
+        string Run_Prompt()
         {
             do
             {
+                var initialState = Console.TreatControlCAsInput;
+                Console.TreatControlCAsInput = true;
+                System.Threading.SpinWait.SpinUntil(() => Console.KeyAvailable || taskCancel.IsCancellationRequested);
+                Console.TreatControlCAsInput = initialState;
+
+                if (!Console.KeyAvailable) continue;
+
                 var key = Console.ReadKey(true);
 
-                if (key == null) throw new ArgumentNullException("Console ReadKey returned null");
+                if (key == null) throw new ArgumentNullException("Console.ReadKey() returned null");
                 if (key.KeyChar == '\n' || key.KeyChar == '\r' || key.Key == ConsoleKey.Enter)
                     break;
 
@@ -124,15 +161,18 @@ namespace xLog.Widgets
             }
             while (!taskCancel.IsCancellationRequested);
 
-            return Buffer.ToString();
+            return UserInput.ToString();
         }
+        #endregion
+
+        #region Prompt Task
 
         async Task<Ty> Start()
         {
-            if (Equals(Disposed, 1))
+            if (Disposed == 1)
                 return default;
 
-            Ty result = await myTask.ConfigureAwait(false);
+            Ty result = await promptTask.ConfigureAwait(false);
             // Print the users input value
             xLogEngine.Interface(null, string.Concat(Message, result));
             return result;
@@ -141,17 +181,17 @@ namespace xLog.Widgets
         void End()
         {
             taskCancel.Cancel();
-            myTask.Wait();
+            promptTask.Wait();
         }
         #endregion
 
         #region Task Implementation
-        public Ty Result => myTask.Result;
-        public Task<Ty> ToTask() => myTask;
-        public TaskAwaiter<Ty> GetAwaiter() => myTask.GetAwaiter();
-        public ConfiguredTaskAwaitable<Ty> ConfigureAwait(bool continueOnCapturedContext) => myTask.ConfigureAwait(continueOnCapturedContext);
+        public Ty Result => promptTask.Result;
+        public Task<Ty> ToTask() => promptTask;
+        public TaskAwaiter<Ty> GetAwaiter() => promptTask.GetAwaiter();
+        public ConfiguredTaskAwaitable<Ty> ConfigureAwait(bool continueOnCapturedContext) => promptTask.ConfigureAwait(continueOnCapturedContext);
 
-        public void Wait() => myTask.Wait();
+        public void Wait() => promptTask.Wait();
         #endregion
 
         #region Valid Options
@@ -185,11 +225,17 @@ namespace xLog.Widgets
             return true;
         }
         #endregion
+        /// <summary>
+        /// Translates a string of user input into the preferred type for the prompt object
+        /// </summary>
+        /// <param name="UserInput">String of input entered by the user</param>
+        protected abstract Ty Translate_UserInput(string UserInput);
 
-        protected abstract Ty Translate_Prompt_Result(string Result);
-
-
-        void Set_Message(string msg)
+        /// <summary>
+        /// Sets the prompts message text
+        /// </summary>
+        /// <param name="msg"></param>
+        protected void Set_Message(string msg)
         {
             if (string.IsNullOrWhiteSpace(msg))
             {
@@ -198,7 +244,7 @@ namespace xLog.Widgets
             }
 
             // Remove any periods from the end and any whitespace around the message
-            msg = ANSIColor.whiteBright(msg.TrimEnd(new char[] { ' ', '.' }));
+            msg = ANSI.WhiteBright(msg.TrimEnd(new char[] { ' ', '.' }));
 
             // If the message ends with punctuation then we don't append ": "
             if (!char.IsPunctuation(msg.Last()))
@@ -213,23 +259,23 @@ namespace xLog.Widgets
         /// Sets the complete user input string value
         /// </summary>
         /// <param name="Input"></param>
-        void Set_Input(string Input)
+        protected void Set_Input(string Input)
         {
-            if (Equals(Disposed, 1))
+            if (Disposed == 1)
                 return;
 
-            Buffer.Clear();
-            Buffer.Append(Input);
+            UserInput.Clear();
+            UserInput.Append(Input);
             Set_Cursor(int.MaxValue);
             Update();
         }
 
-        void Set_Cursor(int pos)
+        protected virtual void Set_Cursor(int pos)
         {
-            if (Equals(Disposed, 1))
+            if (Disposed == 1)
                 return;
 
-            pos = Math.Max(0, Math.Min(Buffer.Length, pos));
+            pos = Math.Max(0, Math.Min(UserInput.Length, pos));
             if (CursorPos != pos)
             {
                 CursorPos = pos;
@@ -237,22 +283,22 @@ namespace xLog.Widgets
             }
         }
 
-        void Handle_Input_Key(ConsoleKeyInfo key)
+        protected virtual void Handle_Input_Key(ConsoleKeyInfo key)
         {
-            if (Equals(Disposed, 1))
+            if (Disposed == 1)
                 return;
 
             switch (key.Key)
             {
                 case ConsoleKey.Delete:
-                    if (CursorPos == Buffer.Length)
+                    if (CursorPos == UserInput.Length)
                         return;
-                    Buffer.Remove(CursorPos, 1);
+                    UserInput.Remove(CursorPos, 1);
                     break;
                 case ConsoleKey.Backspace:
                     if (CursorPos == 0) return;
                     Set_Cursor(CursorPos - 1);
-                    Buffer.Remove(CursorPos, 1);
+                    UserInput.Remove(CursorPos, 1);
                     break;
                 case ConsoleKey.LeftArrow:
                     Set_Cursor(CursorPos - 1);
@@ -267,30 +313,30 @@ namespace xLog.Widgets
                     Set_Cursor(int.MaxValue);
                     break;
                 default:
-                    string Post = string.Concat(Buffer.ToString(), key.KeyChar);
-                    if (!Validate_Input(Buffer.ToString(), Post, key))
+                    string Post = string.Concat(UserInput.ToString(), key.KeyChar);
+                    if (!Validate_Input(UserInput.ToString(), Post, key))
                     {
                         return;
                     }
 
                     if (key.KeyChar != '\u0000' && !char.IsControl(key.KeyChar))
                     {
-                        Buffer.Insert(CursorPos++, key.KeyChar);// Add users input to the input buffer
+                        UserInput.Insert(CursorPos++, key.KeyChar);// Add users input to the input buffer
                     }
                     break;
             }
         }
 
-        void Update()
+        protected virtual void Update()
         {
-            if (Equals(Disposed, 1))
+            if (Disposed == 1)
                 return;
 
-            lock (Line)
+            lock (StaticLines)
             {
                 // Update input
-                string displayedInput = ConcealInput ? new string('*', Buffer.Length) : Buffer.ToString();// Apply input masking if needed
-                Line.Set(string.Concat(Message, displayedInput));// Update the userinput display line
+                string displayedInput = ConcealInput ? new string('*', UserInput.Length) : UserInput.ToString();// Apply input masking if needed
+                StaticLines[0].Set(string.Concat(Message, displayedInput));// Update the userinput display line
             }
         }
 

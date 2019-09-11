@@ -20,22 +20,22 @@ namespace xLog
             switch (level)
             {
                 case ELogLevel.Trace:
-                    return ANSIColor.blackBright(msg);
+                    return ANSI.BlackBright(msg);
                 case ELogLevel.Info:
                 case ELogLevel.Debug:
-                    return ANSIColor.white(msg);
+                    return ANSI.White(msg);
                 case ELogLevel.Success:
-                    return ANSIColor.green(msg);
+                    return ANSI.Green(msg);
                 case ELogLevel.Failure:
-                    return ANSIColor.red(msg);
+                    return ANSI.Red(msg);
                 case ELogLevel.Warn:
-                    return ANSIColor.yellow(msg);
+                    return ANSI.Yellow(msg);
                 case ELogLevel.Error:
-                    return ANSIColor.red(msg);
+                    return ANSI.Red(msg);
                 case ELogLevel.Assert:
-                    return ANSIColor.magenta(msg);
+                    return ANSI.Magenta(msg);
                 case ELogLevel.Interface:
-                    return ANSIColor.white(msg);
+                    return ANSI.White(msg);
                 default:
                     return msg;
             }
@@ -46,22 +46,22 @@ namespace xLog
             switch (level)
             {
                 case ELogLevel.Trace:
-                    return ANSIColor.white(name);
+                    return ANSI.White(name);
                 case ELogLevel.Info:
                 case ELogLevel.Debug:
-                    return ANSIColor.whiteBright(name);
+                    return ANSI.WhiteBright(name);
                 case ELogLevel.Success:
-                    return ANSIColor.greenBright(name);
+                    return ANSI.GreenBright(name);
                 case ELogLevel.Failure:
-                    return ANSIColor.redBright(name);
+                    return ANSI.RedBright(name);
                 case ELogLevel.Warn:
-                    return ANSIColor.yellowBright(name);
+                    return ANSI.YellowBright(name);
                 case ELogLevel.Error:
-                    return ANSIColor.redBright(name);
+                    return ANSI.RedBright(name);
                 case ELogLevel.Assert:
-                    return ANSIColor.magentaBright(name);
+                    return ANSI.MagentaBright(name);
                 case ELogLevel.Interface:
-                    return ANSIColor.whiteBright(name);
+                    return ANSI.WhiteBright(name);
                 default:
                     return name;
             }

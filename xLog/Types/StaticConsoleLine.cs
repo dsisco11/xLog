@@ -29,7 +29,6 @@ namespace xLog.Widgets
         private Action<StaticConsoleLine> ChangeCallback;
         #endregion
 
-
         #region Constructors
         public StaticConsoleLine()
         {

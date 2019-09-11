@@ -1,7 +1,7 @@
 ﻿
 using System.Threading.Tasks;
 
-namespace xLog.Widgets
+namespace xLog.Widgets.Prompts
 {
     public class Widget_PromptInteger : Widget_PromptBase<int>
     {
@@ -11,7 +11,7 @@ namespace xLog.Widgets
 
         protected override bool Validate_Result(string Result) => int.TryParse(Result, out var _);
 
-        protected override int Translate_Prompt_Result(string Result) => int.Parse(Result);
+        protected override int Translate_UserInput(string Result) => int.Parse(Result);
 
 
         public static async Task<int> Prompt(string Prompt_Message, int? Initial_Value = null)

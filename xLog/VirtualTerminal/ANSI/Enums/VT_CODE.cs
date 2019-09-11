@@ -1,11 +1,7 @@
 ﻿
 namespace xLog
 {
-    /// <summary>
-    /// Used internally by the XTERM utility class.
-    /// DO NOT REFERENCE!
-    /// </summary>
-    internal enum XTERM_CODE : uint
+    internal enum VT_CODE : int
     {
         SET_FG_BLACK = 30,
         SET_FG_RED,

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using xLog.Widgets.Prompts;
 
 namespace xLog.Widgets
 {
@@ -95,7 +96,7 @@ namespace xLog.Widgets
 
         public static void Test()
         {
-            Widget_Countdown widget = new Widget_Countdown(TimeSpan.FromSeconds(20), ANSIColor.cyanBright("Countdown"));
+            Widget_Countdown widget = new Widget_Countdown(TimeSpan.FromSeconds(20), ANSI.CyanBright("Countdown"));
 
             Task.WaitAll(widget.Get_Task());
 

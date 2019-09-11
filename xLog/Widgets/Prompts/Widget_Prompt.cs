@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace xLog.Widgets
+namespace xLog.Widgets.Prompts
 {
     public class Widget_Prompt : Widget_PromptBase<string>
     {
@@ -9,7 +9,7 @@ namespace xLog.Widgets
         {
         }
 
-        protected override string Translate_Prompt_Result(string userInput)
+        protected override string Translate_UserInput(string userInput)
         {
             return userInput;
         }
