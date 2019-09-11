@@ -99,7 +99,7 @@ namespace xLog.Widgets.Prompts
                 Update();
             }
 
-            string userInput = Run_Prompt();
+            string userInput = Run_Prompt_Once();
             if (taskCancel.IsCancellationRequested)
                 return default;
 
@@ -124,7 +124,7 @@ namespace xLog.Widgets.Prompts
                 Update();
             }
 
-            string userInput = Run_Prompt();
+            string userInput = Run_Prompt_Once();
             if (taskCancel.IsCancellationRequested)
                 return default;
 
@@ -139,14 +139,16 @@ namespace xLog.Widgets.Prompts
             return Translate_UserInput(userInput);
         }
 
-        string Run_Prompt()
+        string Run_Prompt_Once()
         {
             do
             {
-                var initialState = Console.TreatControlCAsInput;
-                Console.TreatControlCAsInput = true;
+                //var initialState = Console.TreatControlCAsInput;
+                //Console.TreatControlCAsInput = true;
+                Console.CancelKeyPress += Console_CancelKeyPress;
                 System.Threading.SpinWait.SpinUntil(() => Console.KeyAvailable || taskCancel.IsCancellationRequested);
-                Console.TreatControlCAsInput = initialState;
+                Console.CancelKeyPress -= Console_CancelKeyPress;
+                //Console.TreatControlCAsInput = initialState;
 
                 if (!Console.KeyAvailable) continue;
 
@@ -163,7 +165,17 @@ namespace xLog.Widgets.Prompts
 
             return UserInput.ToString();
         }
+
+        private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            Cancel();
+        }
         #endregion
+
+        public void Cancel()
+        {
+            taskCancel.Cancel();
+        }
 
         #region Prompt Task
 
