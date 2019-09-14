@@ -5,9 +5,11 @@ VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xLog", "xLog\xLog.csproj", "{9D174229-3820-4C39-B40C-601774BD5BF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{39FA40D1-EE10-483E-AB88-AC99F04A4543}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{39FA40D1-EE10-483E-AB88-AC99F04A4543}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prompt_OptionsList", "Samples\Prompt_OptionsList\Prompt_OptionsList.csproj", "{2975502A-7C74-4DD6-9792-5E720269CEC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Prompt_OptionsList", "Samples\Prompt_OptionsList\Prompt_OptionsList.csproj", "{2975502A-7C74-4DD6-9792-5E720269CEC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_VirtualTerminal", "Samples\Test_VirtualTerminal\Test_VirtualTerminal.csproj", "{BF1A17F6-9DC0-42B8-B5A0-C70F52D1622A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{2975502A-7C74-4DD6-9792-5E720269CEC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2975502A-7C74-4DD6-9792-5E720269CEC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2975502A-7C74-4DD6-9792-5E720269CEC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF1A17F6-9DC0-42B8-B5A0-C70F52D1622A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF1A17F6-9DC0-42B8-B5A0-C70F52D1622A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF1A17F6-9DC0-42B8-B5A0-C70F52D1622A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF1A17F6-9DC0-42B8-B5A0-C70F52D1622A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

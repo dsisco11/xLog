@@ -1,8 +1,12 @@
 ﻿
 namespace xLog
 {
-    internal enum ANSI_CODE : int
+    /// <summary>
+    /// Represents all possible Select Graphics Rendition codes
+    /// </summary>
+    internal enum SGR_CODE : int
     {
+        INVALID = -1,
         /// <summary>
         /// Resets all active styling commands
         /// </summary>
@@ -13,9 +17,6 @@ namespace xLog
         BLINK_SLOW = 5,
         BLINK_FAST = 6,
         INVERT = 7,
-
-        SET_DEFAULT_FG = 10,
-        SET_DEFAULT_BG = 11,
 
         BOLD_OFF = 22,
         ITALIC_OFF = 23,
@@ -34,5 +35,6 @@ namespace xLog
 
         SET_COLOR_FG_BRIGHT = 90,
         SET_COLOR_BG_BRIGHT = 100,
+
     }
 }

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace xLog
+namespace xLog.Types
 {
     /// <summary>
     /// Provides access to a genericized, consumable stream of data.
     /// </summary>
     /// <typeparam name="ItemType"></typeparam>
-    internal class DataStream<ItemType>
+    public class DataStream<ItemType>
     {
         #region Properties
         /// <summary>
@@ -20,9 +20,9 @@ namespace xLog
         /// <summary>
         /// The current position at which data will be read from the stream
         /// </summary>
-        public ulong Position { get; private set; } = 0;
+        public int Position { get; private set; } = 0;
 
-        public readonly ItemType EOF_ITEM = default(ItemType);
+        public readonly ItemType EOF_ITEM = default;
         #endregion
 
         #region Constructors
@@ -34,15 +34,14 @@ namespace xLog
 
         public DataStream(ItemType[] Items, ItemType EOF_ITEM)
         {
-            this.Data = new ReadOnlyMemory<ItemType>(Items);
+            Data = new ReadOnlyMemory<ItemType>(Items);
             this.EOF_ITEM = EOF_ITEM;
         }
         #endregion
 
         #region Accessors
         public int Length => Data.Length;
-        public ulong LongLength => (ulong)Data.Length;
-        public ulong Remaining => ((ulong)Data.Length - Position);
+        public int Remaining => (Data.Length - Position);
         /// <summary>
         /// Returns the next item to be consumed, equivalent to calling Peek(0)
         /// </summary>
@@ -59,7 +58,7 @@ namespace xLog
         /// <summary>
         /// Returns whether the stream position is currently at the end of the stream
         /// </summary>
-        public bool atEnd => Position >= LongLength;
+        public bool atEnd => (Remaining <= 0);
 
         /// <summary>
         /// Returns whether the next character in the stream is the EOF character
@@ -84,11 +83,11 @@ namespace xLog
         /// Seeks to a specific position in the stream
         /// </summary>
         /// <param name="position"></param>
-        public void Seek(ulong position, bool end = false)
+        public void Seek(int position, bool end = false)
         {
             if (end)
             {
-                Position = ((ulong)Length - position);
+                Position = Length - position;
             }
             else
             {
@@ -106,7 +105,7 @@ namespace xLog
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ItemType Peek(long Offset = 0)
         {
-            long index = ((long)Position + Offset);
+            long index = Position + Offset;
 
             if (index < 0)
             {
@@ -127,21 +126,21 @@ namespace xLog
         /// <param name="Offset">Distance from the current read position at which to peek</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ItemType Peek(ulong Offset = 0)
+        public ItemType Peek(int Offset = 0)
         {
-            ulong index = (Position + Offset);
+            var index = Position + Offset;
 
             if (index < 0)
             {
                 throw new IndexOutOfRangeException();
             }
 
-            if (index >= (ulong)Stream.Length)
+            if (index >= Stream.Length)
             {
                 return EOF_ITEM;
             }
 
-            return Stream[(int)index];
+            return Stream[index];
         }
         #endregion
 
@@ -150,12 +149,12 @@ namespace xLog
         /// Returns the index of the first item matching the given <paramref name="subject"/>  or -1 if none was found
         /// </summary>
         /// <returns>Index of first item matching the given one or -1 if none was found</returns>
-        public bool Scan(ItemType subject, out ulong outOffset, ulong startOffset = 0, IEqualityComparer<ItemType> comparer = null)
+        public bool Scan(ItemType subject, out int outOffset, int startOffset = 0, IEqualityComparer<ItemType> comparer = null)
         {
             comparer = comparer ?? EqualityComparer<ItemType>.Default;
-            ulong offset = startOffset;
+            var offset = startOffset;
 
-            while ((offset + Position) < (ulong)Length)
+            while (offset + Position < Length)
             {
                 var current = Peek(offset);
                 if (comparer.Equals(current, subject))
@@ -175,11 +174,11 @@ namespace xLog
         /// Returns the index of the first item matching the given predicate or -1 if none was found
         /// </summary>
         /// <returns>Index of first item matching the given predicate or -1 if none was found</returns>
-        public bool Scan(Predicate<ItemType> Predicate, out ulong outOffset, ulong startOffset = 0)
+        public bool Scan(Predicate<ItemType> Predicate, out int outOffset, int startOffset = 0)
         {
-            ulong offset = startOffset;
+            var offset = startOffset;
 
-            while ((offset + Position) < (ulong)Length)
+            while (offset + Position < Length)
             {
                 var current = Peek(offset);
                 if (Predicate(current))
@@ -202,10 +201,10 @@ namespace xLog
         /// </summary>
         public ItemType Consume()
         {
-            var EndPos = (Position + 1);
-            if (Position >= (ulong)Stream.Length) return EOF_ITEM;
+            var EndPos = Position + 1;
+            if (Position >= Length) return EOF_ITEM;
 
-            ItemType retVal = Stream[(int)Position];
+            ItemType retVal = Stream[Position];
             Position += 1;
 
             return retVal;
@@ -216,10 +215,10 @@ namespace xLog
         /// </summary>
         public CastType Consume<CastType>() where CastType : ItemType
         {
-            var EndPos = (Position + 1);
-            if (Position >= (ulong)Stream.Length) return default(CastType);
+            var EndPos = Position + 1;
+            if (Position >= Length) return default;
 
-            ItemType retVal = Stream[(int)Position];
+            ItemType retVal = Stream[Position];
             Position += 1;
 
             return (CastType)retVal;
@@ -229,18 +228,18 @@ namespace xLog
         /// Returns the specified number of items from the stream and progresses the current reading position by that number
         /// </summary>
         /// <param name="Count">Number of characters to consume</param>
-        public ReadOnlySpan<ItemType> Consume(ulong Count = 1)
+        public ReadOnlySpan<ItemType> Consume(int Count = 1)
         {
             var startIndex = Position;
-            var endIndex = (Position + Count);
+            var endIndex = Position + Count;
 
-            if (endIndex >= (ulong)Stream.Length)
+            if (endIndex >= Length)
             {
-                endIndex = (((ulong)Stream.Length) - 1);
+                endIndex = (Length-1);
             }
 
             Position = endIndex;
-            return Stream.Slice((int)startIndex, (int)Count);
+            return Stream.Slice(startIndex, Count);
         }
 
         /// <summary>
@@ -276,7 +275,7 @@ namespace xLog
             }
 
             var count = Position - startIndex;
-            outConsumed = Data.Slice((int)startIndex, (int)count);
+            outConsumed = Data.Slice(startIndex, count);
             return count > 0;
         }
 
@@ -296,7 +295,7 @@ namespace xLog
             }
 
             var count = Position - startIndex;
-            outConsumed = Stream.Slice((int)startIndex, (int)count);
+            outConsumed = Stream.Slice(startIndex, count);
             return count > 0;
         }
 
@@ -304,18 +303,7 @@ namespace xLog
         /// Pushes the given number of items back onto the front of the stream
         /// </summary>
         /// <param name="Count"></param>
-        public void Reconsume(long Count = 1)
-        {
-            if ((ulong)Count > Position) throw new ArgumentOutOfRangeException($"{nameof(Count)} exceeds the number of items consumed.");
-
-            Position -= (ulong)Count;
-        }
-
-        /// <summary>
-        /// Pushes the given number of items back onto the front of the stream
-        /// </summary>
-        /// <param name="Count"></param>
-        public void Reconsume(ulong Count = 1)
+        public void Reconsume(int Count = 1)
         {
             if (Count > Position) throw new ArgumentOutOfRangeException($"{nameof(Count)} exceeds the number of items consumed.");
             Position -= Count;
@@ -330,10 +318,10 @@ namespace xLog
         /// </summary>
         /// <param name="Predicate"></param>
         /// <returns></returns>
-        public DataStream<ItemType> Substream(ulong Count)
+        public DataStream<ItemType> Substream(int Count)
         {
             if (Count > Remaining) throw new ArgumentOutOfRangeException($"{nameof(Count)} exceeds the number of remaining items.");
-            var consumed = Data.Slice((int)Position, (int)Count);
+            var consumed = Data.Slice(Position, Count);
             Position += Count;
             return new DataStream<ItemType>(consumed, EOF_ITEM);
         }
@@ -343,17 +331,17 @@ namespace xLog
         /// </summary>
         /// <param name="Predicate"></param>
         /// <returns></returns>
-        public DataStream<ItemType> Substream(ulong offset = 0, ulong? Count = null)
+        public DataStream<ItemType> Substream(int offset = 0, int? Count = null)
         {
             if (!Count.HasValue)
             {
-                Count = (ulong)Length - (Position + offset);
+                Count = Length - (Position + offset);
             }
 
             if (Count > Remaining) throw new ArgumentOutOfRangeException($"{nameof(Count)} exceeds the number of remaining items.");
 
             Position += offset;
-            var consumed = Data.Slice((int)Position, (int)Count.Value);
+            var consumed = Data.Slice(Position, Count.Value);
             Position += Count.Value;
             return new DataStream<ItemType>(consumed, EOF_ITEM);
         }
@@ -373,7 +361,7 @@ namespace xLog
             }
 
             var count = Position - startIndex;
-            var consumed = Data.Slice((int)startIndex, (int)count);
+            var consumed = Data.Slice(startIndex, count);
 
             return new DataStream<ItemType>(consumed, EOF_ITEM);
         }
@@ -385,10 +373,10 @@ namespace xLog
         /// </summary>
         /// <param name="offset">Offset from the current stream position where the memory slice to begin</param>
         /// <returns></returns>
-        public ReadOnlyMemory<ItemType> Slice(ulong offset = 0)
+        public ReadOnlyMemory<ItemType> Slice(int offset = 0)
         {
-            var index = Math.Max(LongLength, Position + offset);
-            return Data.Slice((int)index, (int)(LongLength - index));
+            var index = Math.Min(Length, Position + offset);
+            return Data.Slice(index, Length - index);
         }
 
         /// <summary>
@@ -397,10 +385,10 @@ namespace xLog
         /// <param name="offset">Offset from the current stream position where the memory slice to begin</param>
         /// <param name="count">The number of items to include in the slice</param>
         /// <returns></returns>
-        public ReadOnlyMemory<ItemType> Slice(ulong offset, ulong count)
+        public ReadOnlyMemory<ItemType> Slice(int offset, int count)
         {
-            var index = Math.Max(LongLength, Position + offset);
-            return Data.Slice((int)index, (int)(LongLength - index));
+            var index = Math.Min(Length, Position + offset);
+            return Data.Slice(index, count);
         }
         #endregion
 
@@ -411,8 +399,12 @@ namespace xLog
         /// <returns></returns>
         public DataStream<ItemType> Clone()
         {
-            return new DataStream<ItemType>(Data, EOF_ITEM) { Position = this.Position };
+            return new DataStream<ItemType>(Data, EOF_ITEM) { Position = Position };
         }
+        #endregion
+
+        #region Overrides
+        public override string ToString() => Data.ToString();
         #endregion
     }
 }

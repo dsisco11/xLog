@@ -1,4 +1,5 @@
 ﻿using System;
+using xLog.VirtualTerminal;
 
 namespace xLog.Widgets
 {
@@ -17,6 +18,8 @@ namespace xLog.Widgets
         /// Tracks the length of the text this line currently has displayed on-screen.
         /// </summary>
         public int Current_Display_Length { get; internal set; } = 0;
+
+        public int? X=null, Y=null;
         /// <summary>
         /// The text this line wants to display on-screen (can differ from what is currently displayed)
         /// </summary>
@@ -27,6 +30,7 @@ namespace xLog.Widgets
         public readonly bool HasCursorControl = false;
         public int CursorPos { get; private set; } = 0;
         private Action<StaticConsoleLine> ChangeCallback;
+        private bool bPositioned = false;
         #endregion
 
         #region Constructors
@@ -108,6 +112,36 @@ namespace xLog.Widgets
                 CursorPos = pos;
                 ChangeCallback?.Invoke(this);
             }
+        }
+
+        public void Update_Position()
+        {
+            X = Console.CursorLeft;
+            Y = Console.CursorTop;
+            bPositioned = true;
+        }
+
+        public void Print()
+        {
+            bool bWasPositioned = bPositioned;
+            if (!bPositioned) Update_Position();
+            if (string.IsNullOrEmpty(Buffer)) return;
+
+            if (bWasPositioned)
+            {
+                Terminal.Push_Cursor();
+                Terminal.Set_Cursor(X, Y);
+            }
+
+            Current_Display_Length = Terminal.Write(Buffer.AsMemory());
+
+            if (bWasPositioned) Terminal.Pop_Cursor();
+        }
+
+        public void Erase()
+        {
+            VirtualTerminal.Terminal.Blit(Current_Display_Length, X, Y);
+            Current_Display_Length = 0;
         }
     }
 }

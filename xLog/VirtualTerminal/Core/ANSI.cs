@@ -14,14 +14,10 @@ using System.Text;
 namespace xLog
 {
     /// <summary>
-    /// Provides a helper class for adding XTERM/ANSI color codes to log messages.
+    /// Provides functions for adding ANSI color codes and other CSI codes to text.
     /// </summary>
     public static class ANSI
     {
-        /// <summary>
-        /// Returns <c>True</c> if the current environment is one which does not support ANSI Escape Codes.
-        /// </summary>
-        public static bool RequiresEmulation => !Platform.Supports_VirtualTerminal();
         /// <summary>
         /// The char that begins an ANSI command.
         /// </summary>
@@ -31,88 +27,68 @@ namespace xLog
         /// Control sequence parameter seperator
         /// </summary>
         public const char SEP = ';';
-        public const char END = 'm';
-
-        /// <summary>
-        /// The ANSI command to reset the Foreground & Background colors back to default
-        /// </summary>
-        public static string COLOR_RESET => string.Concat(CSI, "[", (int)ANSI_CODE.RESET_COLOR_FG, SEP, (int)ANSI_CODE.RESET_COLOR_BG, END);
-        public static string COLOR_RESET_FG => string.Concat(CSI, "[", (int)ANSI_CODE.RESET_COLOR_FG, END);
-        public static string COLOR_RESET_BG => string.Concat(CSI, "[", (int)ANSI_CODE.RESET_COLOR_BG, END);
+        public static string sSEP = Convert.ToString(SEP);
 
 
-        #region COMMAND BUILDING
+        #region Common Command Strings
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string xCmd(int code) => string.Concat(CSI, '[', (int)code, END);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string xCmd(int codeA, int codeB) => string.Concat(CSI, '[', (int)codeA, SEP, (int)codeB, END);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string xCmd(int code, byte R, byte G, byte B) => string.Concat(CSI, '[', (int)code, SEP, R, SEP, G, SEP, B, END); 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string xCmd(int[] codes) => string.Concat(CSI, '[', string.Join(Convert.ToString(SEP), codes), END);
+        public static string CSI_PREFIX = "\x1b[";
 
+        public static string sRESET_COLOR => xCmd(SGR_CODE.RESET_COLOR_FG, SGR_CODE.RESET_COLOR_BG);
+        public static string sRESET_FG => xCmd(SGR_CODE.RESET_COLOR_FG);
+        public static string sRESET_BG => xCmd(SGR_CODE.RESET_COLOR_BG);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string Set_BG_Color(ANSI_COLOR color, string msg) => string.Concat(xCmd((int)ANSI_CODE.SET_COLOR_BG + (int)color), msg, COLOR_RESET);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string Set_BG_Color_Bright(ANSI_COLOR color, string msg) => string.Concat(xCmd((int)ANSI_CODE.SET_COLOR_BG_BRIGHT + (int)color), msg, COLOR_RESET);
+        public static string sPUSH_FG => string.Concat(CSI_PREFIX, (int)XLOG_CODE.PUSH_FG, (char)CSI_COMMAND.XLOG);
+        public static string sPUSH_BG => string.Concat(CSI_PREFIX, (int)XLOG_CODE.PUSH_BG, (char)CSI_COMMAND.XLOG);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string Set_FG_Color(ANSI_COLOR color, string msg) => string.Concat(xCmd((int)ANSI_CODE.SET_COLOR_FG + (int)color), msg, COLOR_RESET_FG);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string Set_FG_Color_Bright(ANSI_COLOR color, string msg) => string.Concat(xCmd((int)ANSI_CODE.SET_COLOR_FG_BRIGHT + (int)color), msg, COLOR_RESET_FG);
-
+        public static string sPOP_FG => string.Concat(CSI_PREFIX, (int)XLOG_CODE.POP_FG, (char)CSI_COMMAND.XLOG);
+        public static string sPOP_BG => string.Concat(CSI_PREFIX, (int)XLOG_CODE.POP_BG, (char)CSI_COMMAND.XLOG);
         #endregion
 
-        #region STYLING
-        public static string Bold(object obj) => string.Concat(xCmd((int)ANSI_CODE.BOLD), Convert.ToString(obj), xCmd((int)ANSI_CODE.BOLD_OFF));
-        public static string Italic(object obj) => string.Concat(xCmd((int)ANSI_CODE.ITALIC), Convert.ToString(obj), xCmd((int)ANSI_CODE.ITALIC_OFF));
-        public static string Underline(object obj) => string.Concat(xCmd((int)ANSI_CODE.UNDERLINE), Convert.ToString(obj), xCmd((int)ANSI_CODE.UNDERLINE_OFF));
-        public static string BlinkSlow(object obj) => string.Concat(xCmd((int)ANSI_CODE.BLINK_SLOW), Convert.ToString(obj), xCmd((int)ANSI_CODE.BLINK_OFF));
-        public static string BlinkFast(object obj) => string.Concat(xCmd((int)ANSI_CODE.BLINK_FAST), Convert.ToString(obj), xCmd((int)ANSI_CODE.BLINK_OFF));
-        public static string Invert(object obj) => string.Concat(xCmd((int)ANSI_CODE.INVERT), Convert.ToString(obj), xCmd((int)ANSI_CODE.INVERT_OFF));
-        public static string Reset_Style(object obj) => string.Concat(xCmd((int)ANSI_CODE.RESET_STYLE), Convert.ToString(obj));
+        #region CSI Formatting
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string xCmd(params SGR_CODE[] Code) => string.Concat(CSI_PREFIX, string.Join(sSEP, Code.Select(x=>(int)x)), (char)CSI_COMMAND.SGR);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string xCmd(int Code) => string.Concat(CSI_PREFIX, Code, (char)CSI_COMMAND.SGR);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string xCmd(params int[] args) => string.Concat(CSI_PREFIX, string.Join(sSEP, args), (char)CSI_COMMAND.SGR);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string xCmd(int Code, params int[] args) => string.Concat(CSI_PREFIX, Code, SEP, string.Join(sSEP, args), (char)CSI_COMMAND.SGR);
         #endregion
 
-        /// <summary>
-        /// Briefly changes the default Foreground color, formats a message, and then resets the foregound color.
-        /// <para>This allows having multiple colors in a single message without interrupting the initial color, Eg: for log lines.</para>
-        /// </summary>
-        public static string asColor(ANSI_COLOR fg, string msg)
-        {
-            // change the default fg color
-            string fgc = xCmd((int)ANSI_CODE.SET_COLOR_FG + (int)fg);
-            string str = string.Concat(fgc, msg);
-            str = Substitute((int)ANSI_CODE.SET_DEFAULT_FG, (int)ANSI_CODE.SET_COLOR_FG + (int)fg, str.AsMemory());
-            return string.Concat(str, COLOR_RESET_FG);
+        #region Formatting Helpers
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Format_Command(string Msg, params int[] Codes) => string.Concat(sPUSH_FG, sPUSH_BG, xCmd(Codes), Msg, sPOP_FG, sPOP_BG);
 
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Set_FG_Color(ANSI_COLOR color, string Msg) => string.Concat(sPUSH_FG, xCmd((int)SGR_CODE.SET_COLOR_CUSTOM_FG, 5, (int)color), Msg, sPOP_FG);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Set_BG_Color(ANSI_COLOR color, string Msg) => string.Concat(sPUSH_BG, xCmd((int)SGR_CODE.SET_COLOR_CUSTOM_BG, 5, (int)color), Msg, sPOP_BG);
+        #endregion
 
-        /// <summary>
-        /// Briefly changes the default Foreground & Background colors, formats a message, and then resets the colors.
-        /// <para>This allows having multiple colors in a single message without interrupting the initial color, Eg: for log lines.</para>
-        /// </summary>
-        public static string asColor(ANSI_COLOR fg, ANSI_COLOR bg, string msg)
+
+        #region Style Commands
+        public static string Bold(object obj) => string.Concat(xCmd(SGR_CODE.BOLD), Convert.ToString(obj), xCmd(SGR_CODE.BOLD_OFF));
+        public static string Italic(object obj) => string.Concat(xCmd(SGR_CODE.ITALIC), Convert.ToString(obj), xCmd(SGR_CODE.ITALIC_OFF));
+        public static string Underline(object obj) => string.Concat(xCmd(SGR_CODE.UNDERLINE), Convert.ToString(obj), xCmd(SGR_CODE.UNDERLINE_OFF));
+        public static string BlinkSlow(object obj) => string.Concat(xCmd(SGR_CODE.BLINK_SLOW), Convert.ToString(obj), xCmd(SGR_CODE.BLINK_OFF));
+        public static string BlinkFast(object obj) => string.Concat(xCmd(SGR_CODE.BLINK_FAST), Convert.ToString(obj), xCmd(SGR_CODE.BLINK_OFF));
+        public static string Invert(object obj) => string.Concat(xCmd(SGR_CODE.INVERT), Convert.ToString(obj), xCmd(SGR_CODE.INVERT_OFF));
+        public static string Reset_Style(object obj) => string.Concat(Convert.ToString(obj), xCmd(SGR_CODE.RESET_STYLE));
+        #endregion
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string Set_FG_Custom(int R, int G, int B, StringPtr Str)
         {
-            string str = string.Concat(xCmd((int)ANSI_CODE.SET_COLOR_FG + (int)fg, (int)ANSI_CODE.SET_COLOR_BG + (int)bg), msg);
-            str = Substitute((int)ANSI_CODE.SET_DEFAULT_FG, (int)ANSI_CODE.SET_COLOR_FG + (int)fg, str.AsMemory());
-            str = Substitute((int)ANSI_CODE.SET_DEFAULT_BG, (int)ANSI_CODE.SET_COLOR_BG + (int)bg, str.AsMemory());
-            return string.Concat(str, COLOR_RESET);
+            int[] sub = new int[] { 2, R, G, B };
+            return string.Concat(xCmd((int)SGR_CODE.SET_COLOR_CUSTOM_FG, sub), Str.ToString(), sRESET_COLOR);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string Set_FG_Custom(int R, int G, int B, string msg)
+        internal static string Set_BG_Custom(int R, int G, int B, StringPtr Str)
         {
-            int[] sub = new int[] { (int)ANSI_CODE.SET_COLOR_CUSTOM_FG, 2, R, G, B };
-            return string.Concat(xCmd(sub), msg, COLOR_RESET);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string Set_BG_Custom(int R, int G, int B, string msg)
-        {
-            int[] sub = new int[] { (int)ANSI_CODE.SET_COLOR_CUSTOM_BG, 2, R, G, B };
-            return string.Concat(xCmd(sub), msg, COLOR_RESET_BG);
+            int[] sub = new int[] { 2, R, G, B };
+            return string.Concat(xCmd((int)SGR_CODE.SET_COLOR_CUSTOM_BG, sub), Str.ToString(), sRESET_BG);
         }
 
         #region Command Manipulation
@@ -126,12 +102,12 @@ namespace xLog
         internal static string Substitute(int Target, int Substitute, ReadOnlyMemory<char> Str)
         {
             // Get the list of CSI's 
-            var Commands = VT.Compile_Command_Blocks(Str);
+            var Commands = Terminal.Compile_Command_Blocks(Str);
 
             StringBuilder sb = new StringBuilder();
             foreach (var Block in Commands)
             {
-                int[] codes = Block.Codes.Select(c => ((int)c == Target ? Substitute : (int)c)).ToArray();
+                int[] codes = Block.Parameters.Select(c => ((int)c == Target ? Substitute : (int)c)).ToArray();
                 sb.Append(string.Concat(xCmd(codes), Block.Text.ToString()));
             }
 
@@ -145,12 +121,12 @@ namespace xLog
         internal static string Substitute(int Target, int[] Substitute, ReadOnlyMemory<char> Str)
         {
             // Get the list of CSI's 
-            var Commands = VT.Compile_Command_Blocks(Str);
+            var Commands = Terminal.Compile_Command_Blocks(Str);
 
             StringBuilder sb = new StringBuilder();
             foreach (var Block in Commands)
             {
-                List<int> codes = Block.Codes.Select(c => (int)c).ToList();
+                List<int> codes = Block.Parameters.Select(c => (int)c).ToList();
                 int idx = codes.IndexOf(Target);
                 if (idx > -1)
                 {
@@ -165,9 +141,7 @@ namespace xLog
         }
         #endregion
 
-        #region UTILITY
-
-
+        #region Utility
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ConsoleColor Color_ANSI_To_Console(ANSI_COLOR Color)
         {
@@ -206,7 +180,10 @@ namespace xLog
                 case ANSI_COLOR.BLACK:
                     return ConsoleColor.Black;
                 default:
-                    throw new ArgumentOutOfRangeException($"Unknown color mapping: {Color.ToString()}");
+                    {
+                        System.Diagnostics.Debugger.Break();
+                        throw new ArgumentOutOfRangeException($"{nameof(Color)}({Color.ToString()})");
+                    }
             }
         }
 
@@ -248,39 +225,21 @@ namespace xLog
                 case ConsoleColor.Black:
                     return ANSI_COLOR.BLACK;
                 default:
-                    throw new ArgumentOutOfRangeException($"Unknown color mapping: {Color.ToString()}");
+                    {
+                        System.Diagnostics.Debugger.Break();
+                        throw new ArgumentOutOfRangeException($"{nameof(Color)}({Color.ToString()})");
+                    }
             }
         }
-        #endregion
-
-        #region OUTPUT
-        internal static void Write(ReadOnlyMemory<char> Str)
-        {
-            if (!RequiresEmulation)
-            {
-                Console.Write(Str);
-            }
-            else
-            {
-                VT.Emulate(Str);
-            }
-        }
-
-        internal static void WriteLine(ReadOnlyMemory<char> Str)
-        {
-            Write( Str );
-            Write( COLOR_RESET.AsMemory() );
-            Console.WriteLine();
-        }
-
         #endregion
 
         /// <summary>
         /// Strips all of the XTERM command sequences from a string and returns the cleaned string.
         /// </summary>
-        public static string Strip(ReadOnlyMemory<char> Str)
+        public static string Strip(StringPtr Str)
         {
-            var Commands = VT.Compile_Command_Blocks(Str);
+            if (Str == null) return null;
+            var Commands = Terminal.Compile_Command_Blocks(Str);
 
             StringBuilder sb = new StringBuilder();
             foreach (var Block in Commands)
@@ -297,6 +256,12 @@ namespace xLog
         /// </summary>
         /// <returns>ANSI Color encoded string</returns>
         public static string CustomFG(byte R, byte G, byte B, object obj) => Set_FG_Custom(R, G, B, Convert.ToString(obj));
+
+        /// <summary>
+        /// Sets the foreground color for the given text
+        /// </summary>
+        /// <returns>ANSI Color encoded string</returns>
+        public static string CustomFG(byte R, byte G, byte B, StringPtr Str) => Set_FG_Custom(R, G, B, Str);
         #region DARK
         /// <summary>
         /// Sets the foreground color for the given text

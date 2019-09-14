@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using xLog.Widgets;
+using xLog.VirtualTerminal;
 
 namespace xLog.Widgets.Prompts
 {
@@ -30,17 +31,25 @@ namespace xLog.Widgets.Prompts
     {
         #region Properties
         /// <summary>
+        /// Determines whether or not the users input will be shown in the console
+        /// </summary>
+        protected bool bUserInputVisible = true;
+        /// <summary>
         /// The prompt message
         /// </summary>
         protected string Message = string.Empty;
         /// <summary>
         /// If true then characters in the user input string will be replaced with the masking character
         /// </summary>
-        bool ConcealInput = false;
+        protected bool MaskUserInput = false;
         /// <summary>
         /// Console cursor position
         /// </summary>
-        int CursorPos = 0;
+        protected int CursorPos = 0;
+        /// <summary>
+        /// The captured <see cref="ConsoleInput"/> context
+        /// </summary>
+        protected Guid InputContext = Guid.Empty;
 
         PromptInputValidatorDelegate InputValidator = null;
         PromptResultValidatorDelegate ResultValidator = null;
@@ -49,6 +58,7 @@ namespace xLog.Widgets.Prompts
         CancellationTokenSource taskCancel;
 
         protected StringBuilder UserInput => Buffer;
+        protected ManualResetEventSlim UserInputSignal;
         #endregion
 
         #region Constructors
@@ -56,27 +66,27 @@ namespace xLog.Widgets.Prompts
         {
             Set_Message(Prompt_Message);
             Set_Input(Initial_Value ?? string.Empty);
-            ConcealInput = Conceal_Input;
+            MaskUserInput = Conceal_Input;
 
             InputValidator = input_validator;
             ResultValidator = result_validator;
+            UserInputSignal = new ManualResetEventSlim();
 
-            taskCancel = new CancellationTokenSource();
-            promptTask = Task.Run(Run_Prompt_And_Translate_Async, taskCancel.Token);
+            /*taskCancel = new CancellationTokenSource();
+            promptTask = Task.Run(Run_Prompt_Async, taskCancel.Token);*/
         }
 
         public override void Dispose()
         {
-            if (promptTask != null)
-            {
-                taskCancel.Cancel();
-                promptTask.Wait();
+            End();
 
+            if (!ReferenceEquals(null, promptTask))
+            {
                 promptTask.Dispose();
                 promptTask = null;
             }
 
-            if (taskCancel != null)
+            if (!ReferenceEquals(null, taskCancel))
             {
                 taskCancel.Dispose();
                 taskCancel = null;
@@ -88,112 +98,128 @@ namespace xLog.Widgets.Prompts
 
         #region Prompt Loop
 
-        public Ty Run_Prompt_And_Translate()
+        public Ty Run_Prompt()
         {
-            BEGINNING:
-            List<string> opts = Get_Valid_Options()?.ToList();
-            if (!ReferenceEquals(opts, null) && opts.Count > 0)
+            if (!ReferenceEquals(null, taskCancel) && taskCancel.IsCancellationRequested)
             {
-                string strOpts = string.Join(", ", opts);
-                xLogEngine.Console(string.Concat(ANSI.WhiteBright("Options: "), ANSI.White(strOpts)));
-                Update();
+                taskCancel.Dispose();
+                taskCancel = null;
             }
 
-            string userInput = Run_Prompt_Once();
-            if (taskCancel.IsCancellationRequested)
-                return default;
-
-            if (!Validate_Result(userInput))
+            if (ReferenceEquals(null, taskCancel))
             {
-                xLogEngine.Console(ANSI.RedBright($"Invalid Response: \"{userInput}\""));
-                Set_Input(string.Empty);
-                goto BEGINNING;
+                taskCancel = new CancellationTokenSource();
             }
 
-            xLogEngine.Interface(string.Empty, string.Concat(Message, ANSI.White(userInput)));
+            return Await_User_Input();
+        }
+
+        private async Task<Ty> Run_Prompt_Async()
+        {
+            return await Task.Run(Await_User_Input);
+        }
+
+
+        private Ty Await_User_Input()
+        {
+            string userInput = string.Empty;
+            try
+            {
+                InputContext = ConsoleInput.Capture(Pre_Handle_Input_Key);
+
+                while (true)
+                {
+                    List<string> opts = Get_Valid_Options()?.ToList();
+                    if (!ReferenceEquals(opts, null) && opts.Count > 0)
+                    {
+                        string strOpts = string.Join(", ", opts);
+                        xLogEngine.Console(string.Concat(ANSI.WhiteBright("Options: "), ANSI.White(strOpts)));
+                        Update();
+                    }
+
+                    try
+                    {
+                        UserInputSignal.Wait(taskCancel.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {/* Ignore */
+                        Set_Input(string.Empty);
+                        return default;
+                    }
+
+                    if (taskCancel.IsCancellationRequested)
+                        return default;
+
+                    userInput = UserInput.ToString();
+                    if (Validate_Result(userInput))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        xLogEngine.Console(ANSI.RedBright($"Invalid Response: \"{userInput}\""));
+                        Set_Input(string.Empty);
+                    }
+                }
+            }
+            finally
+            {
+                ConsoleInput.Release(InputContext);
+            }
+
+
+            if (bUserInputVisible) xLogEngine.Interface(string.Empty, string.Concat(Message, ANSI.White(userInput)));
             return Translate_UserInput(userInput);
         }
-
-        private async Task<Ty> Run_Prompt_And_Translate_Async()
-        {
-            List<string> opts = Get_Valid_Options()?.ToList();
-            if (!ReferenceEquals(opts, null) && opts.Count > 0)
-            {
-                string strOpts = string.Join(", ", opts);
-                xLogEngine.Console(string.Concat(ANSI.WhiteBright("Options: "), ANSI.White(strOpts)));
-                Update();
-            }
-
-            string userInput = Run_Prompt_Once();
-            if (taskCancel.IsCancellationRequested)
-                return default;
-
-            if (!Validate_Result(userInput))
-            {
-                xLogEngine.Console(ANSI.RedBright($"Invalid Response: \"{userInput}\""));
-                Set_Input(string.Empty);
-                return await Run_Prompt_And_Translate_Async().ConfigureAwait(false);
-            }
-
-            xLogEngine.Interface(string.Empty, string.Concat(Message, ANSI.White(userInput)));
-            return Translate_UserInput(userInput);
-        }
-
-        string Run_Prompt_Once()
-        {
-            do
-            {
-                //var initialState = Console.TreatControlCAsInput;
-                //Console.TreatControlCAsInput = true;
-                Console.CancelKeyPress += Console_CancelKeyPress;
-                System.Threading.SpinWait.SpinUntil(() => Console.KeyAvailable || taskCancel.IsCancellationRequested);
-                Console.CancelKeyPress -= Console_CancelKeyPress;
-                //Console.TreatControlCAsInput = initialState;
-
-                if (!Console.KeyAvailable) continue;
-
-                var key = Console.ReadKey(true);
-
-                if (key == null) throw new ArgumentNullException("Console.ReadKey() returned null");
-                if (key.KeyChar == '\n' || key.KeyChar == '\r' || key.Key == ConsoleKey.Enter)
-                    break;
-
-                Handle_Input_Key(key);
-                Update();
-            }
-            while (!taskCancel.IsCancellationRequested);
-
-            return UserInput.ToString();
-        }
-
-        private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
-        {
-            Cancel();
-        }
-        #endregion
 
         public void Cancel()
         {
             taskCancel.Cancel();
         }
+        #endregion
 
         #region Prompt Task
 
         async Task<Ty> Start()
         {
             if (Disposed == 1)
+            {
                 return default;
+            }
+
+            if (!ReferenceEquals(null, promptTask) ^ !ReferenceEquals(null, taskCancel))
+            {/* Needs to be stopped */
+                End();
+            }
+
+            if (ReferenceEquals(null, promptTask) && ReferenceEquals(null, taskCancel))
+            {/* Both null, safe to initialize */
+                taskCancel = new CancellationTokenSource();
+                promptTask = Task.Run(Run_Prompt_Async, taskCancel.Token);
+            }
 
             Ty result = await promptTask.ConfigureAwait(false);
             // Print the users input value
-            xLogEngine.Interface(null, string.Concat(Message, result));
+            if (bUserInputVisible) xLogEngine.Interface(null, string.Concat(Message, result));
             return result;
         }
 
         void End()
         {
-            taskCancel.Cancel();
-            promptTask.Wait();
+            if (!ReferenceEquals(null, promptTask))
+            {
+                taskCancel?.Cancel();
+
+                promptTask.Wait();
+                promptTask.Dispose();
+                promptTask = null;
+            }
+
+            if (!ReferenceEquals(null, taskCancel))
+            {
+                taskCancel.Dispose();
+                taskCancel = null;
+            }
         }
         #endregion
 
@@ -206,7 +232,7 @@ namespace xLog.Widgets.Prompts
         public void Wait() => promptTask.Wait();
         #endregion
 
-        #region Valid Options
+        #region Input Options
         protected virtual IEnumerable<string> Get_Valid_Options()
         {
             return null;
@@ -237,12 +263,8 @@ namespace xLog.Widgets.Prompts
             return true;
         }
         #endregion
-        /// <summary>
-        /// Translates a string of user input into the preferred type for the prompt object
-        /// </summary>
-        /// <param name="UserInput">String of input entered by the user</param>
-        protected abstract Ty Translate_UserInput(string UserInput);
 
+        #region Setters
         /// <summary>
         /// Sets the prompts message text
         /// </summary>
@@ -282,62 +304,122 @@ namespace xLog.Widgets.Prompts
             Update();
         }
 
-        protected virtual void Set_Cursor(int pos)
+        protected virtual void Set_Cursor(int index)
         {
             if (Disposed == 1)
                 return;
 
-            pos = Math.Max(0, Math.Min(UserInput.Length, pos));
-            if (CursorPos != pos)
+            index = Math.Max(0, Math.Min(UserInput.Length, index));
+            if (CursorPos != index)
             {
-                CursorPos = pos;
+                CursorPos = index;
                 Line.Set_Cursor_Pos(Message.Length + CursorPos);
             }
         }
+        #endregion
 
-        protected virtual void Handle_Input_Key(ConsoleKeyInfo key)
+        #region User Input
+        /// <summary>
+        /// Translates a string of user input into the preferred type for the prompt object
+        /// </summary>
+        /// <param name="UserInput">String of input entered by the user</param>
+        protected abstract Ty Translate_UserInput(string UserInput);
+
+
+        /// <summary>
+        /// This is a sort of base input handler that implements functionality which applies to ALL possible prompt controls
+        /// </summary>
+        protected virtual void Pre_Handle_Input_Key(ConsoleKeyInfo key, KeyState state)
         {
             if (Disposed == 1)
                 return;
 
             switch (key.Key)
             {
-                case ConsoleKey.Delete:
-                    if (CursorPos == UserInput.Length)
-                        return;
-                    UserInput.Remove(CursorPos, 1);
+                case ConsoleKey.Escape:
+                    {/* Abort the prompt */
+                        taskCancel.Cancel(throwOnFirstException: false);
+                    }
                     break;
-                case ConsoleKey.Backspace:
-                    if (CursorPos == 0) return;
-                    Set_Cursor(CursorPos - 1);
-                    UserInput.Remove(CursorPos, 1);
-                    break;
-                case ConsoleKey.LeftArrow:
-                    Set_Cursor(CursorPos - 1);
-                    break;
-                case ConsoleKey.RightArrow:
-                    Set_Cursor(CursorPos + 1);
-                    break;
-                case ConsoleKey.Home:
-                    Set_Cursor(0);
-                    break;
-                case ConsoleKey.End:
-                    Set_Cursor(int.MaxValue);
+                case ConsoleKey.Enter:
+                    {/* Signal that user input is complete */
+                        UserInputSignal.Set();
+                    }
                     break;
                 default:
-                    string Post = string.Concat(UserInput.ToString(), key.KeyChar);
-                    if (!Validate_Input(UserInput.ToString(), Post, key))
-                    {
-                        return;
-                    }
-
-                    if (key.KeyChar != '\u0000' && !char.IsControl(key.KeyChar))
-                    {
-                        UserInput.Insert(CursorPos++, key.KeyChar);// Add users input to the input buffer
+                    {/* Pass the event on to the normal event */
+                        Handle_Input_Key(key, state);
                     }
                     break;
             }
         }
+
+        protected virtual void Handle_Input_Key(ConsoleKeyInfo key, KeyState state)
+        {
+            if (Disposed == 1)
+                return;
+
+            lock (UserInput)
+            {
+                switch (key.Key)
+                {
+                    case ConsoleKey.Delete:
+                        {
+                            if (CursorPos < UserInput.Length)
+                            {
+                                UserInput.Remove(CursorPos, 1);
+                            }
+                        }
+                        break;
+                    case ConsoleKey.Backspace:
+                        {
+                            if (CursorPos > 0)
+                            {
+                                Set_Cursor(CursorPos - 1);
+                                UserInput.Remove(CursorPos, 1);
+                            }
+                        }
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        {
+                            Set_Cursor(CursorPos - 1);
+                        }
+                        break;
+                    case ConsoleKey.RightArrow:
+                        {
+                            Set_Cursor(CursorPos + 1);
+                        }
+                        break;
+                    case ConsoleKey.Home:
+                        {
+                            Set_Cursor(0);
+                        }
+                        break;
+                    case ConsoleKey.End:
+                        {
+                            Set_Cursor(int.MaxValue);
+                        }
+                        break;
+                    default:
+                        {
+                            string Post = string.Concat(UserInput.ToString(), key.KeyChar);
+                            if (!Validate_Input(UserInput.ToString(), Post, key))
+                            {
+                                return;
+                            }
+
+                            if (key.KeyChar != '\u0000' && !char.IsControl(key.KeyChar))
+                            {
+                                UserInput.Insert(CursorPos++, key.KeyChar);// Add users input to the input buffer
+                            }
+                        }
+                        break;
+                }
+            }
+
+            Update();
+        }
+        #endregion
 
         protected virtual void Update()
         {
@@ -347,7 +429,7 @@ namespace xLog.Widgets.Prompts
             lock (StaticLines)
             {
                 // Update input
-                string displayedInput = ConcealInput ? new string('*', UserInput.Length) : UserInput.ToString();// Apply input masking if needed
+                string displayedInput = MaskUserInput ? new string('*', UserInput.Length) : UserInput.ToString();// Apply input masking if needed
                 StaticLines[0].Set(string.Concat(Message, displayedInput));// Update the userinput display line
             }
         }

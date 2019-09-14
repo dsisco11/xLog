@@ -4,13 +4,13 @@ using System.Collections.Generic;
 namespace xLog
 {
     /// <summary>
-    /// Base class for all <see cref="LineFormatter"/> which format the output text for all logging functions.
+    /// Base class for all <see cref="LogFormatter"/> which format the output text for all logging functions.
     /// <para>By inheriting this class custom formatters can be made to change the output text for log functions.</para>
     /// <para>To use a custom formatter an instance of it must be assigned to the <see cref="xLogEngine.CurrentFormatter"/> variable.</para>
     /// </summary>
-    public class LineFormatter : ILogLineFormatter
+    public class LogFormatter : ILogLineFormatter
     {
-        public LineFormatter()
+        public LogFormatter()
         {
         }
 

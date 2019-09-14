@@ -63,9 +63,9 @@ namespace xLog
         public int IndentSize = 4;
 
         /// <summary>
-        /// Used to assign a custom <see cref="LineFormatter"/> to manipulate log line output
+        /// Used to assign a custom <see cref="LogFormatter"/> to manipulate log line output
         /// </summary>
-        public LineFormatter Formatter = null;
+        public LogFormatter Formatter = null;
 
         /// <summary>
         /// Determines if lines of a particular <see cref="ELogLevel"/> will have the level name prepended to them.

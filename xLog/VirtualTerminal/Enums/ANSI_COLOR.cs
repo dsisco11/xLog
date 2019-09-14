@@ -12,7 +12,7 @@ namespace xLog
         CYAN,
         WHITE,
 
-        BLACK_BRIGHT = 60,
+        BLACK_BRIGHT = 8,
         RED_BRIGHT,
         GREEN_BRIGHT,
         YELLOW_BRIGHT,

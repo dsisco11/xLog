@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using xLog.Widgets;
+using xLog.VirtualTerminal;
 
 namespace xLog
 {
@@ -26,7 +27,7 @@ namespace xLog
         #region Properties
         private static int Disposed = 0;
         private static Task writerTask;
-        private static LineFormatter DefaultFormatter = new LineFormatter();
+        private static LogFormatter DefaultFormatter = new LogFormatter();
 
         /// <summary>
         /// Tracks current line indentation for all log levels
@@ -262,9 +263,11 @@ namespace xLog
             }
             catch (Exception ex)
             {
+                string exMsg = CurrentFormatter.Format_Exception(ex);
+                System.Diagnostics.Debug.Fail(ex.Message, exMsg);
                 System.Console.WriteLine( "=====[ LOGGING SYSTEM ENCOUNTERED A FATAL ERROR ]=====" );
-                System.Console.WriteLine( CurrentFormatter.Format_Exception(ex) );
-                throw;
+                System.Console.WriteLine( exMsg );
+                throw Make_Exception_External(ex);
             }
             finally
             {
@@ -309,14 +312,13 @@ namespace xLog
                     System.Diagnostics.Debug.WriteLine( line.Text );
                     if (line.Level >= Settings.OutputLevel)
                     {
-                        if (Settings.AllowColorCodes )
+                        string Text = line.Text;
+                        if (!Settings.AllowColorCodes )
                         {
-                            ANSI.WriteLine( line.Text.AsMemory());
+                            Text = ANSI.Strip(Text);
                         }
-                        else
-                        {
-                            System.Console.Write( line.Text );
-                        }
+
+                        Terminal.WriteLine( Text.AsMemory());
                     }
                 }
                 catch (Exception ex) when (ex.InnerException != null)
@@ -497,7 +499,9 @@ namespace xLog
         private static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Banner(ELogLevel.Error, "System", "UNHANDLED EXCEPTION\r\nSHUTTING DOWN");
-            Error(null, CurrentFormatter.Format_Exception(e.ExceptionObject as Exception));
+            var exMsg = CurrentFormatter.Format_Exception(e.ExceptionObject as Exception);
+            System.Diagnostics.Debug.Fail(exMsg);
+            Error(null, exMsg);
             Debug(null, Environment.StackTrace);
     #if DEBUG
     #else
@@ -615,7 +619,7 @@ namespace xLog
             //if (Stream != null && level >= FileLogLevel) Stream.Write(formattedString);
             if (level >= xLogEngine.Settings.OutputLevel)
             {
-                ANSI.Write(formattedString.AsMemory());
+                Terminal.Write(formattedString.AsMemory());
             }
         }
 
@@ -691,6 +695,7 @@ namespace xLog
         {
             lock (StaticLines)
             {
+                line.Erase();
                 StaticLines.Remove( line );
                 if ( CursorControlLine.TryGetTarget(out StaticConsoleLine ccl) )
                 {
@@ -749,14 +754,6 @@ namespace xLog
             return false;
         }
 
-        private static void Clear_Console_Line(int LineLength)
-        {
-            // Jump to beginning of line and Overwrite all the previous characters with spaces
-            System.Console.Write("\r");
-            System.Console.Write(new string(' ', Math.Min(System.Console.BufferWidth, LineLength) - 1));
-            System.Console.Write("\r");
-        }
-
         /// <summary>
         /// Clears all static line text from the console.
         /// </summary>
@@ -769,8 +766,7 @@ namespace xLog
                     StaticConsoleLine line = Static_Display_Stack.Pop();
                     if (line == null) continue;
 
-                    Clear_Console_Line(line.Current_Display_Length);
-                    line.Current_Display_Length = 0;
+                    line.Erase();
                 }
             }
         }
@@ -782,12 +778,9 @@ namespace xLog
         /// <param name="line"></param>
         private static void Bump_Line(StaticConsoleLine line)
         {
-            if (!string.IsNullOrEmpty(line.Buffer))
-            {
-                ANSI.Write(line.Buffer.AsMemory());
-                line.Current_Display_Length = line.Buffer.Length;
-                Static_Display_Stack.Push(line);
-            }
+            if (line == null) return;
+            line.Print();
+            Static_Display_Stack.Push(line);
         }
         /// <summary>
         /// Prints all static lines into the console.
@@ -796,6 +789,8 @@ namespace xLog
         {
             lock (StaticLines)
             {
+                bool bWasVis = System.Console.CursorVisible;
+                System.Console.CursorVisible = false;
                 foreach(StaticConsoleLine line in StaticLines)
                 {
                     if ( !ReferenceEquals(line, CursorControlLine) )
@@ -813,6 +808,7 @@ namespace xLog
                     System.Console.CursorTop = y;
                 }
 
+                System.Console.CursorVisible = bWasVis;
                 StaticLine_Update_Signal.Reset();
             }
         }

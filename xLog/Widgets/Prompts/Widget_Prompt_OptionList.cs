@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using xLog.VirtualTerminal;
 
 namespace xLog.Widgets.Prompts
 {
@@ -23,14 +24,26 @@ namespace xLog.Widgets.Prompts
         }
         #endregion
 
+        #region Backing Values
+        private int _selection;
+        #endregion
+
         #region Properties
         bool bInitialized = false;
         public readonly EListDirection Direction;
         private readonly ListItem[] Options = null;
+
         /// <summary>
-        /// The currently selection item from the list
+        /// The currently selected item in the list
         /// </summary>
-        public int Selection => Translate_UserInput(UserInput.ToString());
+        public int Selection {
+            get => _selection;
+            set {
+                _selection = Math.Max(Math.Min(value, Options.Length-1), 0);
+                Update();
+            }
+        }
+
         #endregion
 
         #region Constructors
@@ -45,6 +58,7 @@ namespace xLog.Widgets.Prompts
         {
             this.Options = Options.ToArray();
             this.Direction = Direction.GetValueOrDefault(EListDirection.Vertical);
+            bUserInputVisible = false;
             for (int i = 0; i < this.Options.Length; i++)
             {
                 StaticLines.Add(new StaticConsoleLine());
@@ -54,9 +68,11 @@ namespace xLog.Widgets.Prompts
         }
         #endregion
 
-        protected override int Translate_UserInput(string Result)
+        protected override int Translate_UserInput(string UserInput)
         {
-            return Convert.ToInt32(Result);
+            return Selection;
+            /*if (string.IsNullOrEmpty(UserInput)) return 0;
+            return Convert.ToInt32(UserInput);*/
         }
 
         protected override void Update()
@@ -65,22 +81,26 @@ namespace xLog.Widgets.Prompts
 
             lock (StaticLines)
             {
-                StaticLines[0].Set(string.Concat(Message, UserInput.ToString()));// Update the userinput display line
+                StaticLines[0].Set(string.Concat(Message, "\r\n"));// Update the userinput display line
                 for (int i = 0; i < Options.Length; i++)
                 {
                     var opt = Options[i];
 
-                    var Text = (i == Selection) ? ANSI.Invert(opt.Text) : opt.Text;
-                    var cmds = opt.ForegroundColor.Get_ANSI_Code().Union(opt.BackgroundColor.Get_ANSI_Code());
-                    Text = string.Concat(ANSI.xCmd(cmds.ToArray()), Text, ANSI.COLOR_RESET);
+                    var cmds = new List<int>( opt.ForegroundColor.Get_SGR_Code() );
+                    var bgclr = opt.BackgroundColor.Get_SGR_Code(true);
+                    cmds.AddRange(bgclr);
+
+                    string Text = opt.Text;
+                    if (i == Selection) Text = ANSI.Invert(Text);
+                    Text = ANSI.Format_Command(Text, cmds.ToArray());
 
                     switch (Direction)
                     {
                         case EListDirection.Vertical:
-                            Text = string.Concat('[', i, ']', ' ', Text);
+                            Text = string.Concat('[', i, ']', ' ', Text, "\r\n");
                             break;
                         case EListDirection.Horizontal:
-                            Text = string.Concat(Text, ' ');
+                            Text = string.Concat(' ', Text, ' ');
                             break;
                     }
 
@@ -89,7 +109,41 @@ namespace xLog.Widgets.Prompts
             }
         }
 
-        #region Prompts
+
+        protected override void Handle_Input_Key(ConsoleKeyInfo key, KeyState state)
+        {
+            if (Disposed == 1)
+                return;
+
+            switch (key.Key)
+            {
+                case ConsoleKey.UpArrow:
+                    Selection -= 1;
+                    break;
+                case ConsoleKey.DownArrow:
+                    Selection += 1;
+                    break;
+
+                case ConsoleKey.LeftArrow:
+                    Selection -= 1;
+                    break;
+                case ConsoleKey.RightArrow:
+                    Selection += 1;
+                    break;
+
+                case ConsoleKey.Home:
+                    Selection = 0;
+                    break;
+                case ConsoleKey.End:
+                    Selection = Options.Length - 1; ;
+                    break;
+                default:
+                    Console.Beep();
+                    break;
+            }
+        }
+
+        #region Awaitable Implementation
         public static async Task<int> Prompt(string Prompt_Message, IEnumerable<ListItem> Options, EListDirection? Direction = null, int DefaultSelection = 0)
         {
             using (var p = new Widget_Prompt_OptionList(Prompt_Message, Options, Direction, DefaultSelection))
